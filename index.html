@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Repte de Geometria · 4t de primària</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2b2d42;--muted:#6b6f85;--bg:#f4f8fc;--grid:#cfe3f5;--card:#fff;--ok:#2fa36b;--okbg:#e5f6ec;--ko:#e5484d;--kobg:#fdecec;--acc:#5b5bd6;--sun:#ffc93c}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:Nunito,system-ui,sans-serif;color:var(--ink);background-color:var(--bg);
+background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;}
+#app{max-width:980px;margin:0 auto;padding:18px 16px 60px}
+h1,h2,h3,.ff{font-family:Fredoka,Nunito,sans-serif}
+button{font-family:inherit;cursor:pointer}
+.hero{text-align:center;padding:18px 10px 8px}
+.hero h1{font-size:clamp(30px,5vw,48px);margin:0;letter-spacing:.5px}
+.hero h1 span{display:inline-block}
+.hero p{font-size:19px;color:var(--muted);margin:8px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+.mcard{background:var(--card);border-radius:22px;padding:18px 18px 16px;border:3px solid var(--ink);box-shadow:6px 6px 0 var(--ink);text-align:left;display:flex;gap:14px;align-items:center;transition:transform .12s,box-shadow .12s;font-size:16px}
+.mcard:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+.mcard:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--ink)}
+.mcard .em{font-size:40px;width:64px;height:64px;border-radius:18px;display:grid;place-items:center;flex:none;border:3px solid var(--ink)}
+.mcard h3{margin:0;font-size:22px}
+.mcard small{color:var(--muted);font-size:15px;display:block;margin-top:2px}
+.mcard .stars{font-size:18px;margin-top:4px;letter-spacing:2px}
+.mcard.final{grid-column:1/-1;background:linear-gradient(120deg,#fff6d6,#ffe1ec);justify-content:center}
+.mcard.final .em{background:var(--sun)}
+.tip{margin:26px auto 0;max-width:640px;background:#fff;border-radius:16px;padding:14px 18px;border:2px dashed #9bb8d6;font-size:16px;color:var(--muted);text-align:center}
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mt{font-family:Fredoka;font-size:22px;font-weight:600;text-align:center}
+.ghostbtn{background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:9px 14px;font-weight:800;font-size:15px;color:var(--ink)}
+.ghostbtn:hover{background:#fff8de}
+.prog{height:14px;background:#fff;border:2.5px solid var(--ink);border-radius:20px;margin:14px 0 6px;overflow:hidden}
+.prog div{height:100%;background:linear-gradient(90deg,#7bd389,#3fb5e8);transition:width .4s}
+.count{font-size:15px;color:var(--muted);font-weight:700;text-align:center}
+.qcard{background:var(--card);border:3px solid var(--ink);border-radius:26px;box-shadow:7px 7px 0 var(--ink);padding:22px 22px 24px;margin-top:14px}
+.prompt{font-family:Fredoka;font-size:clamp(21px,3vw,27px);font-weight:600;text-align:center;line-height:1.25}
+.prompt .sub{display:block;font-family:Nunito;font-size:16px;color:var(--muted);font-weight:700;margin-top:6px}
+#figbox{display:flex;justify-content:center;margin:12px 0 4px}
+.fig{width:100%;max-width:400px;height:auto;display:block}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:16px}
+.opt{background:#fff;border:3px solid var(--ink);border-radius:18px;padding:16px 12px;font-size:20px;font-weight:800;color:var(--ink);min-height:62px;box-shadow:4px 4px 0 var(--ink);transition:transform .1s}
+.opt:hover:not(:disabled){background:#fff8de;transform:translateY(-2px)}
+.opt:disabled{cursor:default}
+.opt.right{background:var(--okbg);border-color:var(--ok);box-shadow:4px 4px 0 var(--ok);color:#1d6b45}
+.opt.wrong{background:var(--kobg);border-color:var(--ko);box-shadow:4px 4px 0 var(--ko);color:#a32227}
+.opt.dim{opacity:.45}
+.tf{grid-template-columns:1fr 1fr}
+.tf .opt{font-size:24px;min-height:80px}
+.fb{margin-top:18px;border-radius:18px;padding:16px 18px;font-size:18px;line-height:1.45;border:3px solid}
+.fb.ok{background:var(--okbg);border-color:var(--ok)}
+.fb.ko{background:var(--kobg);border-color:var(--ko)}
+.fb.info{background:#fff7dc;border-color:#e2b93b}
+.fb b.big{font-family:Fredoka;font-size:23px;display:block;margin-bottom:4px}
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:16px}
+.primary{background:var(--acc);color:#fff;border:3px solid var(--ink);border-radius:18px;padding:14px 26px;font-size:20px;font-weight:800;box-shadow:4px 4px 0 var(--ink)}
+.primary:hover:not(:disabled){filter:brightness(1.08)}
+.primary:disabled{opacity:.4;cursor:default}
+.secondary{background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:18px;padding:14px 22px;font-size:18px;font-weight:800;box-shadow:4px 4px 0 var(--ink)}
+.tapfig{cursor:pointer}
+.tapfig [data-el]{cursor:pointer}
+/* ordenar */
+.hint{color:var(--muted);font-weight:700;font-size:15px;text-align:center;margin-top:6px}
+.tray{min-height:120px;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;padding:12px;margin-top:12px;background:#f6f9ff;border:2.5px dashed #9bb8d6;border-radius:18px}
+.tray.over{background:#eaf2ff}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:14px}
+.bin{border:3px solid var(--c);background:color-mix(in srgb,var(--c) 12%,#fff);border-radius:20px;min-height:170px;padding:10px;cursor:pointer;transition:transform .1s}
+.bin.over{transform:scale(1.02);background:color-mix(in srgb,var(--c) 26%,#fff)}
+.bin .bt{font-family:Fredoka;font-weight:600;font-size:19px;text-align:center;color:var(--ink)}
+.bin .bd{font-size:13.5px;text-align:center;color:var(--muted);font-weight:700;margin-bottom:6px}
+.bin .bc{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.card{width:112px;background:#fff;border:2.5px solid var(--ink);border-radius:14px;padding:4px;touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;box-shadow:3px 3px 0 var(--ink)}
+.card svg{width:100%;height:auto;display:block;pointer-events:none}
+.card.sel{outline:4px solid var(--sun);outline-offset:2px}
+.card.dragging{opacity:.3}
+.card.ok{border-color:var(--ok);box-shadow:3px 3px 0 var(--ok);background:var(--okbg)}
+.card.ko{border-color:var(--ko);box-shadow:3px 3px 0 var(--ko);background:var(--kobg)}
+.ghost{position:fixed;pointer-events:none;z-index:50;opacity:.9;transform:rotate(-4deg) scale(1.05);box-shadow:6px 6px 0 rgba(0,0,0,.25)}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(30,32,50,.55);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;z-index:40;overflow:auto}
+.modal .box{background:#fff;border:3px solid var(--ink);border-radius:24px;max-width:860px;width:100%;padding:20px 22px 24px;box-shadow:8px 8px 0 var(--ink)}
+.modal h2{margin:0 0 4px;font-size:28px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:12px}
+.ritem{border:2px solid #d9e3ee;border-radius:16px;padding:8px 10px 10px;text-align:center;background:#fbfdff}
+.ritem svg{width:100%;max-width:160px;height:auto}
+.ritem b{font-family:Fredoka;font-size:18px;display:block}
+.ritem span{font-size:14.5px;color:var(--muted);font-weight:700}
+.rsec{font-family:Fredoka;font-size:21px;margin:18px 0 0;padding-bottom:4px;border-bottom:3px solid #eef2f7}
+.rnote{background:#fff7dc;border-radius:14px;padding:10px 14px;margin-top:12px;font-weight:700;font-size:16px}
+/* resultats */
+.res{text-align:center}
+.res .bigstars{font-size:58px;letter-spacing:6px;margin:6px 0}
+.nota{font-family:Fredoka;font-size:84px;font-weight:700;line-height:1;margin:8px 0 0}
+.nota small{font-size:30px;color:var(--muted)}
+.review{text-align:left;margin-top:18px}
+.review .it{border:2px solid #f2c3c5;background:#fff6f6;border-radius:14px;padding:10px 14px;margin-top:10px;font-size:16px}
+.confetti{position:fixed;top:-20px;font-size:26px;pointer-events:none;z-index:60;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
+.pop{animation:pop .35s ease}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* ============ Utilitats ============ */
+const INK='#2b2d42';
+const FILLS=['#E8557F','#B8A4D9','#3DA5E0','#F6D33C','#86C185','#EFB46A','#7FC8C2','#F28B66','#9AD0F5','#C7E07A'];
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]]}return a};
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1]],add=(a,b)=>[a[0]+b[0],a[1]+b[1]],mul=(v,k)=>[v[0]*k,v[1]*k];
+const len=v=>Math.hypot(v[0],v[1]),norm=v=>{const l=len(v);return[v[0]/l,v[1]/l]};
+const cross=(a,b)=>a[0]*b[1]-a[1]*b[0],dot=(a,b)=>a[0]*b[0]+a[1]*b[1];
+const f=p=>p[0].toFixed(1)+','+p[1].toFixed(1);
+const $=s=>document.querySelector(s);
+const wrap=(inner,vb='0 0 200 140',cls='fig')=>`<svg class="${cls}" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const polyEl=(p,fill,sw=3)=>`<polygon points="${p.map(f).join(' ')}" fill="${fill}" stroke="${INK}" stroke-width="${sw}" stroke-linejoin="round"/>`;
+const lineEl=(a,b,col=INK,w=3,extra='')=>`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col}" stroke-width="${w}" stroke-linecap="round" ${extra}/>`;
+
+function fit(pts,{rot=0,flip=false,W=200,H=140,pad=16}={}){
+  let p=pts.map(([x,y])=>[flip?-x:x,y]);
+  const r=rot*Math.PI/180,c=Math.cos(r),s=Math.sin(r);
+  p=p.map(([x,y])=>[x*c-y*s,x*s+y*c]);
+  const xs=p.map(q=>q[0]),ys=p.map(q=>q[1]);
+  const minx=Math.min(...xs),maxx=Math.max(...xs),miny=Math.min(...ys),maxy=Math.max(...ys);
+  const sc=Math.min((W-2*pad)/(maxx-minx||1),(H-2*pad)/(maxy-miny||1));
+  const ox=(W-(maxx-minx)*sc)/2,oy=(H-(maxy-miny)*sc)/2;
+  return p.map(([x,y])=>[ox+(x-minx)*sc,oy+(y-miny)*sc]);
+}
+function angleAt(p,i){const n=p.length,v=p[i],a=sub(p[(i-1+n)%n],v),b=sub(p[(i+1)%n],v);return Math.acos(Math.max(-1,Math.min(1,dot(a,b)/(len(a)*len(b)))))*180/Math.PI}
+function arcPath(p,i,r){const n=p.length,v=p[i],u1=norm(sub(p[(i-1+n)%n],v)),u2=norm(sub(p[(i+1)%n],v));
+  const s=add(v,mul(u1,r)),e=add(v,mul(u2,r)),sw=cross(u1,u2)>0?1:0;return `M${f(s)} A${r} ${r} 0 0 ${sw} ${f(e)}`}
+function rightMark(p,i,s=13,col='#8E5BB5'){const n=p.length,v=p[i],u1=norm(sub(p[(i-1+n)%n],v)),u2=norm(sub(p[(i+1)%n],v));
+  const a=add(v,mul(u1,s)),c=add(v,mul(u2,s)),b=add(a,mul(u2,s));return `<path d="M${f(a)} L${f(b)} L${f(c)}" fill="none" stroke="${col}" stroke-width="3"/>`}
+function ticks(a,b,count,col=INK){const m=mul(add(a,b),.5),u=norm(sub(b,a)),nn=[-u[1],u[0]];let s='';
+  for(let k=0;k<count;k++){const o=add(m,mul(u,(k-(count-1)/2)*6));s+=lineEl(add(o,mul(nn,-7)),add(o,mul(nn,7)),col,3)}return s}
+function regPts(n,r=58,cx=100,cy=70){return Array.from({length:n},(_,i)=>{const a=-Math.PI/2+(n%2?0:Math.PI/n)+i*2*Math.PI/n;return[cx+r*Math.cos(a),cy+r*Math.sin(a)]})}
+function irrPts(n){const st=2*Math.PI/n;const raw=Array.from({length:n},(_,i)=>{const a=-Math.PI/2+i*st+(Math.random()-.5)*st*.5;const r=32+rnd(34);return[r*Math.cos(a),r*Math.sin(a)]});return fit(raw)}
+
+/* ============ Dades ============ */
+const NOMS={3:'Triangle',4:'Quadrilàter',5:'Pentàgon',6:'Hexàgon',7:'Heptàgon',8:'Octàgon',9:'Enneàgon',10:'Decàgon'};
+const ARTICLE=n=>({3:'un triangle',4:'un quadrilàter',5:'un pentàgon',6:'un hexàgon',7:'un heptàgon',8:'un octàgon',9:'un enneàgon',10:'un decàgon'}[n]);
+const TRI_SIDES={
+  'Equilàter':[[[0,0],[100,0],[50,-86.6]]],
+  'Isòsceles':[[[0,0],[50,0],[25,-110]],[[0,0],[150,0],[75,-60]],[[0,0],[110,0],[55,-70]]],
+  'Escalè':[[[20,115],[180,100],[130,30]],[[20,120],[170,55],[105,30]],[[0,0],[160,0],[40,-90]]]
+};
+const TRI_ANG={
+  'Acutangle':[[[60,125],[150,125],[105,20]],[[30,120],[170,110],[90,25]],[[0,0],[100,0],[50,-86.6]]],
+  'Rectangle':[[[0,0],[0,-100],[130,0]],[[0,0],[140,0],[140,-80]],[[0,0],[80,0],[0,-80]]],
+  'Obtusangle':[[[15,110],[185,110],[60,60]],[[60,25],[185,95],[95,120]],[[0,0],[150,0],[-30,-50]]]
+};
+const QUAD={
+  'Quadrat':[[[0,0],[80,0],[80,80],[0,80]]],
+  'Rectangle':[[[0,0],[140,0],[140,70],[0,70]],[[0,0],[70,0],[70,120],[0,120]],[[0,0],[160,0],[160,60],[0,60]]],
+  'Rombe':[[[50,0],[100,70],[50,140],[0,70]],[[60,0],[140,35],[60,70],[-20,35]]],
+  'Romboide':[[[40,0],[160,0],[120,70],[0,70]],[[0,0],[110,0],[150,60],[40,60]]],
+  'Trapezi':[[[35,0],[115,0],[150,70],[0,70]],[[0,0],[90,0],[140,70],[0,70]],[[0,0],[160,0],[115,70],[45,70]],[[65,0],[165,0],[125,70],[0,70]]],
+  'Trapezoide':[[[20,90],[50,35],[150,25],[175,125]],[[50,50],[140,20],[175,120],[20,100]]]
+};
+const FAM={Quadrat:'Paral·lelogram',Rectangle:'Paral·lelogram',Rombe:'Paral·lelogram',Romboide:'Paral·lelogram',Trapezi:'Trapezi',Trapezoide:'Trapezoide'};
+const IRR_SHAPES=[[[0,0],[30,0],[30,60],[75,60],[75,90],[0,90]],[[0,0],[50,0],[50,25],[95,25],[95,65],[0,65]]];
+
+const EXP={
+  'Punt':'Un <b>punt</b> és només un puntet: marca un lloc.',
+  'Recta':'La <b>recta</b> no té ni principi ni final: continua sempre pels dos costats.',
+  'Semirecta':'La <b>semirecta</b> té un punt d’inici (el puntet) i continua sense final per l’altre costat.',
+  'Segment':'El <b>segment</b> té principi i final: un puntet a cada extrem.',
+  'Rectes paral·leles':'Les <b>paral·leles</b> no es tallen mai, com les vies del tren.',
+  'Rectes perpendiculars':'Les <b>perpendiculars</b> es tallen formant angles rectes, com una creu <b>+</b>.',
+  'Rectes secants':'Les <b>secants</b> es tallen en un punt de manera inclinada, com una <b>X</b>.',
+  'Equilàter':'<b>Equilàter</b>: tres costats iguals. Mira les marques: totes iguals!',
+  'Isòsceles':'<b>Isòsceles</b>: dos costats iguals (els que tenen marca) i un de diferent.',
+  'Escalè':'<b>Escalè</b>: tres costats desiguals. Cada costat té una marca diferent.',
+  'Acutangle':'<b>Acutangle</b>: els tres angles són aguts (més tancats que un angle recte).',
+  'TRectangle':'<b>Rectangle</b>: té un angle recte (com la cantonada d’un full). L’hem marcat amb un quadradet.',
+  'Obtusangle':'<b>Obtusangle</b>: té un angle obtús (més obert que un angle recte). L’hem marcat en vermell.',
+  'Paral·lelogram':'És un <b>paral·lelogram</b>: els costats oposats són paral·lels de dos en dos (mira els colors).',
+  'Trapezi':'És un <b>trapezi</b>: només té dos costats oposats paral·lels (els blaus).',
+  'Trapezoide':'És un <b>trapezoide</b>: no té cap costat paral·lel.',
+  'Quadrat':'<b>Quadrat</b>: 4 costats iguals i 4 angles rectes.',
+  'QRectangle':'<b>Rectangle</b>: 4 angles rectes i els costats iguals de dos en dos (dos de llargs i dos de curts).',
+  'Rombe':'<b>Rombe</b>: 4 costats iguals però sense angles rectes (forma de diamant).',
+  'Romboide':'<b>Romboide</b>: costats iguals de dos en dos i sense angles rectes (està inclinat).',
+  'vertex':'El <b>vèrtex</b> és el punt on s’ajunten dos costats (les cantonades).',
+  'side':'Els <b>costats</b> són les línies que tanquen el polígon.',
+  'angle':'L’<b>angle</b> és l’obertura entre dos costats que s’ajunten en un vèrtex.',
+  'diagonal':'La <b>diagonal</b> uneix dos vèrtexs que no estan seguits. Va per dins del polígon!'
+};
+const EL_NAME={vertex:'Vèrtex',side:'Costat',angle:'Angle',diagonal:'Diagonal'};
+
+const TF={
+ linies:[
+  ['La recta no té ni principi ni final.',true,EXP['Recta']],
+  ['El segment no té cap punt final.',false,'El segment té dos extrems: comença en un punt i acaba en un altre.'],
+  ['La semirecta té un punt d’inici i no s’acaba mai per l’altre costat.',true,EXP['Semirecta']],
+  ['Les rectes paral·leles es tallen en un punt.',false,EXP['Rectes paral·leles']],
+  ['Les rectes perpendiculars es tallen formant angles rectes, com una creu +.',true,EXP['Rectes perpendiculars']],
+  ['Les rectes secants es tallen en un punt.',true,EXP['Rectes secants']]],
+ poligons:[
+  ['Un pentàgon té 6 costats.',false,'El pentàgon té <b>5</b> costats. El de 6 és l’hexàgon.'],
+  ['Un octàgon té 8 costats.',true,'Sí! Octàgon = 8 costats (com un pop, que té 8 potes 🐙).'],
+  ['Un polígon regular té tots els costats iguals.',true,'Correcte: <b>regular</b> = costats iguals.'],
+  ['Un polígon irregular té tots els costats iguals.',false,'L’<b>irregular</b> té costats diferents.'],
+  ['L’enneàgon té 9 costats.',true,'Sí, l’enneàgon en té 9.'],
+  ['L’heptàgon té 6 costats.',false,'L’heptàgon en té <b>7</b>. El de 6 és l’hexàgon.'],
+  ['El decàgon té 10 costats.',true,'Sí, deca = 10.']],
+ elements:[
+  ['Un triangle té 3 costats, 3 vèrtexs i 3 angles.',true,'Sí! En un polígon sempre hi ha el mateix nombre de costats, vèrtexs i angles.'],
+  ['El vèrtex és el punt on s’ajunten dos costats.',true,EXP.vertex],
+  ['La diagonal és un dels costats del polígon.',false,EXP.diagonal],
+  ['Un hexàgon té 6 vèrtexs.',true,'Sí: 6 costats, 6 vèrtexs i 6 angles.'],
+  ['Un quadrat té 2 angles.',false,'En té <b>4</b>: un a cada vèrtex.']],
+ triangles:[
+  ['Un triangle escalè té dos costats iguals.',false,'L’escalè té els tres costats <b>desiguals</b>. El de dos iguals és l’isòsceles.'],
+  ['Un triangle equilàter té els tres costats iguals.',true,EXP['Equilàter']],
+  ['Un triangle rectangle té un angle recte.',true,EXP['TRectangle']],
+  ['Un triangle obtusangle té tres angles aguts.',false,'L’obtusangle té <b>un angle obtús</b>. El de tres angles aguts és l’acutangle.'],
+  ['Un triangle acutangle té tres angles aguts.',true,EXP['Acutangle']],
+  ['El triangle isòsceles té dos costats iguals.',true,EXP['Isòsceles']]],
+ quadrilaters:[
+  ['El quadrat és un paral·lelogram.',true,'Sí: els seus costats oposats són paral·lels.'],
+  ['Un trapezi té els quatre costats paral·lels.',false,'El trapezi <b>només</b> té dos costats oposats paral·lels.'],
+  ['Un trapezoide no té cap costat paral·lel.',true,EXP['Trapezoide']],
+  ['El rombe és un trapezi.',false,'El rombe és un <b>paral·lelogram</b>: té els costats paral·lels de dos en dos.'],
+  ['El romboide és un paral·lelogram.',true,'Sí: quadrat, rectangle, rombe i romboide són paral·lelograms.'],
+  ['El rectangle té quatre angles rectes.',true,EXP['QRectangle']]]
+};
+
+/* ============ Figures ============ */
+function lineFig(type,rot,after=false,cls='fig'){
+  const L=66,a=[100-L,70],b=[100+L,70];let inner='';
+  if(type==='Punt') inner=`<circle cx="100" cy="70" r="7" fill="${INK}"/>`;
+  else{
+    inner=lineEl(a,b,INK,4);
+    if(type==='Semirecta'||type==='Segment') inner+=`<circle cx="${a[0]}" cy="70" r="7" fill="${INK}"/>`;
+    if(type==='Segment') inner+=`<circle cx="${b[0]}" cy="70" r="7" fill="${INK}"/>`;
+    if(after&&type!=='Segment'){ // fletxes que indiquen que continua
+      const ar=(x,d)=>`<path d="M${x} 70 l${-12*d} -8 M${x} 70 l${-12*d} 8" stroke="#3DA5E0" stroke-width="3.5" fill="none" stroke-linecap="round"/>`;
+      inner+=`<line x1="${b[0]+4}" y1="70" x2="${b[0]+22}" y2="70" stroke="#3DA5E0" stroke-width="3.5" stroke-dasharray="4 4"/>`+ar(b[0]+26,1);
+      if(type==='Recta') inner+=`<line x1="${a[0]-4}" y1="70" x2="${a[0]-22}" y2="70" stroke="#3DA5E0" stroke-width="3.5" stroke-dasharray="4 4"/>`+ar(a[0]-26,-1);
+    }
+  }
+  return wrap(`<g transform="rotate(${rot} 100 70)">${inner}</g>`,'0 0 200 140',cls);
+}
+function pairFig(type,rot,after=false,cls='fig'){
+  let inner='';
+  if(type==='Rectes paral·leles'){inner=lineEl([38,48],[162,48],INK,4)+lineEl([38,92],[162,92],INK,4);
+    if(after) inner+=`<path d="M70 52 V88 M130 52 V88" stroke="#3DA5E0" stroke-width="2" stroke-dasharray="4 4"/>`;}
+  else if(type==='Rectes perpendiculars'){inner=lineEl([40,70],[160,70],INK,4)+lineEl([100,12],[100,128],INK,4);
+    if(after) inner+=`<path d="M100 56 H114 V70" fill="none" stroke="#8E5BB5" stroke-width="3"/>`;}
+  else{const r=a=>[Math.cos(a*Math.PI/180)*62,Math.sin(a*Math.PI/180)*62];const p=r(28),q=r(-28);
+    inner=lineEl([100-p[0],70-p[1]],[100+p[0],70+p[1]],INK,4)+lineEl([100-q[0],70-q[1]],[100+q[0],70+q[1]],INK,4);
+    if(after) inner+=`<circle cx="100" cy="70" r="6" fill="#E5484D"/>`;}
+  return wrap(`<g transform="rotate(${rot} 100 70)">${inner}</g>`,'0 0 200 140',cls);
+}
+function triFig(p,fill,mode=null,cls='fig'){
+  let s=polyEl(p,fill);
+  if(mode==='sides'){
+    const L=[0,1,2].map(i=>len(sub(p[(i+1)%3],p[i])));const eq=(a,b)=>Math.abs(a-b)/Math.max(a,b)<.03;
+    const info=triInfo(p);let cnt=[1,2,3];
+    if(info.sidesCls==='Equilàter') cnt=[1,1,1];
+    else if(info.sidesCls==='Isòsceles'){cnt=[0,0,0];for(let i=0;i<3;i++)for(let j=i+1;j<3;j++)if(eq(L[i],L[j])){cnt[i]=1;cnt[j]=1}}
+    for(let i=0;i<3;i++) if(cnt[i]) s+=ticks(p[i],p[(i+1)%3],cnt[i]);
+  }
+  if(mode==='angles'){
+    const info=triInfo(p);
+    for(let i=0;i<3;i++){const a=info.A[i];
+      if(Math.abs(a-90)<1.5) s+=rightMark(p,i,14);
+      else if(a>90) s+=`<path d="${arcPath(p,i,18)}" fill="none" stroke="#E5484D" stroke-width="4"/>`;
+      else if(info.angCls==='Acutangle') s+=`<path d="${arcPath(p,i,15)}" fill="none" stroke="#1d8a52" stroke-width="3.5"/>`;
+    }
+  }
+  return wrap(s,'0 0 200 140',cls);
+}
+function triInfo(p){
+  const L=[0,1,2].map(i=>len(sub(p[(i+1)%3],p[i])));const eq=(a,b)=>Math.abs(a-b)/Math.max(a,b)<.03;
+  const sidesCls=(eq(L[0],L[1])&&eq(L[1],L[2]))?'Equilàter':(eq(L[0],L[1])||eq(L[1],L[2])||eq(L[0],L[2]))?'Isòsceles':'Escalè';
+  const A=[0,1,2].map(i=>angleAt(p,i));const mx=Math.max(...A);
+  const angCls=Math.abs(mx-90)<1.5?'Rectangle':mx>90?'Obtusangle':'Acutangle';
+  return {L,A,sidesCls,angCls};
+}
+function quadFig(p,fill,showPar=false,cls='fig'){
+  let s=polyEl(p,fill);
+  if(showPar){
+    const d=i=>norm(sub(p[(i+1)%4],p[i]));const par=(i,j)=>Math.abs(cross(d(i),d(j)))<.02;
+    const cols=['#9aa0a6','#9aa0a6','#9aa0a6','#9aa0a6'];const pA=par(0,2),pB=par(1,3);
+    if(pA){cols[0]=cols[2]='#1E6FD9'} if(pB){cols[1]=cols[3]=pA?'#F07C00':'#1E6FD9'}
+    for(let i=0;i<4;i++) s+=lineEl(p[i],p[(i+1)%4],cols[i],7);
+  }
+  return wrap(s,'0 0 200 140',cls);
+}
+function polyFig(p,fill,ticksAll=false,cls='fig'){let s=polyEl(p,fill);if(ticksAll)p.forEach((a,i)=>s+=ticks(a,p[(i+1)%p.length],1));return wrap(s,'0 0 200 140',cls)}
+
+function elemFig(p,{tap=false,hl=null}={}){
+  const n=p.length,H='#FF2E7A';let s=polyEl(p,'#FBE7A1',0);
+  const showDiag=tap||(hl&&hl.t==='diagonal');
+  if(showDiag){const isH=hl&&hl.t==='diagonal';s+=lineEl(p[0],p[2],isH?H:'#555',isH?6:2.5,isH?'':'stroke-dasharray="7 5"')}
+  p.forEach((a,i)=>{const isH=hl&&hl.t==='side'&&hl.i===i;s+=lineEl(a,p[(i+1)%n],isH?H:INK,isH?8:3.5)});
+  if(tap) p.forEach((a,i)=>s+=`<path d="${arcPath(p,i,20)}" fill="none" stroke="#E5484D" stroke-width="3"/>`);
+  if(hl&&hl.t==='angle') s+=`<path d="${arcPath(p,hl.i,22)}" fill="none" stroke="${H}" stroke-width="7"/>`;
+  p.forEach((a,i)=>{const isH=hl&&hl.t==='vertex'&&hl.i===i;
+    if(isH) s+=`<circle cx="${a[0]}" cy="${a[1]}" r="13" fill="${H}" opacity=".3"/><circle cx="${a[0]}" cy="${a[1]}" r="8" fill="${H}"/>`;
+    else if(tap) s+=`<circle cx="${a[0]}" cy="${a[1]}" r="6" fill="#2fa36b"/>`;
+    else if(!hl||hl.t!=='vertex') s+=`<circle cx="${a[0]}" cy="${a[1]}" r="4" fill="${INK}"/>`;
+  });
+  if(tap){
+    const T='stroke="rgba(0,0,0,0)"';
+    p.forEach((a,i)=>s+=lineEl(a,p[(i+1)%n],'rgba(0,0,0,0)',18,'data-el="side"'));
+    s+=lineEl(p[0],p[2],'rgba(0,0,0,0)',16,'data-el="diagonal"');
+    p.forEach((a,i)=>s+=`<path d="${arcPath(p,i,20)}" fill="none" ${T} stroke-width="16" data-el="angle"/>`);
+    p.forEach(a=>s+=`<circle cx="${a[0]}" cy="${a[1]}" r="12" fill="rgba(0,0,0,0)" data-el="vertex"/>`);
+  }
+  return wrap(s,'-6 -6 212 152',tap?'fig tapfig':'fig');
+}
+const elemShape=()=>pick([()=>fit(QUAD['Quadrat'][0]),()=>regPts(5),()=>regPts(6),()=>fit(QUAD['Rectangle'][0]),()=>fit(QUAD['Romboide'][0])])();
+
+/* ============ Generadors de preguntes ============ */
+const TRI_ROT=()=>({rot:pick([0,0,15,-20,90,180,200]),flip:Math.random()<.5});
+function choice(o){return Object.assign({type:'choice'},o)}
+
+function gLineType(){const t=pick(['Punt','Recta','Semirecta','Segment']);const rot=pick([0,0,-15,20,35,-40,90]);
+  return choice({key:'lt'+t,prompt:'Què és això?',svg:lineFig(t,rot),svgAfter:lineFig(t,rot,true),options:shuffle(['Punt','Recta','Semirecta','Segment']),answer:t,explain:EXP[t]})}
+function gLinePair(){const t=pick(['Rectes paral·leles','Rectes perpendiculars','Rectes secants']);const rot=pick([0,0,15,-20,30,60,90]);
+  return choice({key:'lp'+t,prompt:'Com són aquestes rectes?',svg:pairFig(t,rot),svgAfter:pairFig(t,rot,true),options:['Rectes paral·leles','Rectes perpendiculars','Rectes secants'],answer:t,explain:EXP[t]})}
+function gLineText(){const Q=[['Quina línia no té ni principi ni final?','Recta'],['Quina línia té un principi però no té final?','Semirecta'],['Quina línia té principi i final (un punt a cada extrem)?','Segment'],
+  ['Quines rectes no es tallen mai?','Rectes paral·leles'],['Quines rectes es tallen fent una creu + amb angles rectes?','Rectes perpendiculars'],['Quines rectes es tallen de manera inclinada, com una X?','Rectes secants']];
+  const [q,a]=pick(Q);const opts=a.startsWith('Rectes')?['Rectes paral·leles','Rectes perpendiculars','Rectes secants']:shuffle(['Recta','Semirecta','Segment','Punt']);
+  return choice({key:'ltx'+q,prompt:q,options:opts,answer:a,explain:EXP[a]})}
+
+function nameOpts(n){const pool=Object.keys(NOMS).map(Number).filter(k=>k!==n);const near=shuffle(pool.filter(k=>Math.abs(k-n)<=2)).slice(0,2);const far=shuffle(pool.filter(k=>!near.includes(k))).slice(0,1);return shuffle([n,...near,...far]).map(k=>NOMS[k])}
+function gPolyName(){const n=3+rnd(8);const irr=Math.random()<.3&&n>=4;const p=irr?irrPts(n):regPts(n);const fill=pick(FILLS);
+  let after=polyEl(p,fill);p.forEach((a,i)=>{const m=mul(add(a,p[(i+1)%n]),.5);const c=[100,70];const o=add(m,mul(norm(sub(m,c)),12));after+=`<text x="${o[0].toFixed(1)}" y="${(o[1]+5).toFixed(1)}" font-family="Fredoka" font-size="13" font-weight="700" text-anchor="middle" fill="#1E6FD9">${i+1}</text>`});
+  return choice({key:'pn'+n,prompt:'Com es diu aquest polígon?<span class="sub">Compta’n els costats</span>',svg:polyFig(p,fill),svgAfter:wrap(after,'-12 -12 224 164'),options:nameOpts(n),answer:NOMS[n],explain:`Té <b>${n} costats</b>, per tant és ${ARTICLE(n)}.`})}
+function gPolyCount(){const n=3+rnd(8);
+  if(Math.random()<.5){const opts=shuffle([...new Set([n,n-1,n+1,n+2].filter(k=>k>=3))]).slice(0,4);if(!opts.includes(n))opts[0]=n;
+    return choice({key:'pc'+n,prompt:`Quants costats té ${ARTICLE(n)}?`,options:shuffle(opts).map(String),answer:String(n),explain:`${ARTICLE(n)[0].toUpperCase()+ARTICLE(n).slice(1)} té <b>${n} costats</b>.`})}
+  return choice({key:'pc'+n,prompt:`Com es diu el polígon de ${n} costats?`,options:nameOpts(n),answer:NOMS[n],explain:`El polígon de ${n} costats és ${ARTICLE(n)}.`})}
+function regItem(reg){const fill=pick(FILLS);
+  if(reg){const n=3+rnd(6);const p=regPts(n);return{p,fill,reg,svg:polyFig(p,fill),svgAfter:polyFig(p,fill,true),k:'r'+n}}
+  const t=rnd(3);let p;if(t===0)p=irrPts(4+rnd(3));else if(t===1)p=fit(pick(IRR_SHAPES),{flip:Math.random()<.5});else p=fit(pick(QUAD['Rectangle']));
+  return{p,fill,reg,svg:polyFig(p,fill),svgAfter:polyFig(p,fill),k:'i'+t}}
+function gRegular(){const it=regItem(Math.random()<.5);const a=it.reg?'Regular':'Irregular';
+  return choice({key:'rg'+it.k,prompt:'Aquest polígon és regular o irregular?',svg:it.svg,svgAfter:it.svgAfter,options:['Regular','Irregular'],answer:a,
+    explain:it.reg?'Tots els costats són <b>iguals</b> (mira les marques) → <b>regular</b>.':'Té costats de mides <b>diferents</b> → <b>irregular</b>.'})}
+function gSortRegular(){const items=shuffle([true,true,true,false,false,false].map((r,i)=>{const it=regItem(r);return{id:'c'+i,svg:it.svg.replace('class="fig"','class="mini"'),bin:r?'reg':'irr'}}));
+  return{type:'sort',key:'sreg',prompt:'Classifica els polígons',bins:[{id:'reg',label:'Regulars',desc:'costats iguals',color:'#3DA5E0'},{id:'irr',label:'Irregulars',desc:'costats diferents',color:'#EFB46A'}],items,answerText:'Regulars: costats iguals · Irregulars: costats diferents',explain:'Regular = tots els costats iguals. Irregular = costats diferents.'}}
+
+function gTap(){const t=pick(['vertex','side','angle','diagonal']);const p=elemShape();const word={vertex:'un vèrtex',side:'un costat',angle:'un angle',diagonal:'la diagonal'}[t];
+  return{type:'tap',key:'tap'+t,prompt:`Toca ${word} 👆`,svg:elemFig(p,{tap:true}),svgAfter:elemFig(p,{hl:{t,i:1}}),answer:t,answerText:EL_NAME[t],explain:EXP[t]}}
+function gElemName(){const t=pick(['vertex','side','angle','diagonal']);const p=elemShape();const fig=elemFig(p,{hl:{t,i:rnd(p.length)}});
+  return choice({key:'en'+t,prompt:'Com es diu l’element marcat en rosa?',svg:fig,svgAfter:fig,options:['Vèrtex','Costat','Angle','Diagonal'],answer:EL_NAME[t],explain:EXP[t]})}
+function gElemCount(){const n=3+rnd(8);const w=pick(['vèrtexs','angles','costats']);const opts=shuffle([...new Set([n,n-1,n+1,2*n])]).slice(0,4);if(!opts.includes(n))opts[0]=n;
+  return choice({key:'ec'+n+w,prompt:`Quants ${w} té ${ARTICLE(n)}?`,options:shuffle(opts).map(String),answer:String(n),explain:`${ARTICLE(n)[0].toUpperCase()+ARTICLE(n).slice(1)} té ${n} costats, ${n} vèrtexs i ${n} angles. En un polígon sempre en té el mateix nombre!`})}
+
+function gTriSides(){const c=pick(Object.keys(TRI_SIDES));const p=fit(pick(TRI_SIDES[c]),TRI_ROT());const fill=pick(FILLS);const real=triInfo(p).sidesCls;
+  return choice({key:'ts'+real,prompt:'Segons els costats, aquest triangle és…',svg:triFig(p,fill),svgAfter:triFig(p,fill,'sides'),options:['Equilàter','Isòsceles','Escalè'],answer:real,explain:EXP[real]})}
+function gTriAngles(){const c=pick(Object.keys(TRI_ANG));const p=fit(pick(TRI_ANG[c]),TRI_ROT());const fill=pick(FILLS);const real=triInfo(p).angCls;
+  return choice({key:'ta'+real,prompt:'Segons els angles, aquest triangle és…',svg:triFig(p,fill),svgAfter:triFig(p,fill,'angles'),options:['Acutangle','Rectangle','Obtusangle'],answer:real,explain:EXP[real==='Rectangle'?'TRectangle':real]})}
+function gTriText(){const Q=[['Quin triangle té els tres costats iguals?','Equilàter'],['Quin triangle té només dos costats iguals?','Isòsceles'],['Quin triangle té els tres costats desiguals?','Escalè'],
+  ['Quin triangle té un angle recte?','Rectangle'],['Quin triangle té un angle obtús?','Obtusangle'],['Quin triangle té els tres angles aguts?','Acutangle']];
+  const [q,a]=pick(Q);const sides=['Equilàter','Isòsceles','Escalè'].includes(a);
+  return choice({key:'tt'+q,prompt:q,options:sides?['Equilàter','Isòsceles','Escalè']:['Acutangle','Rectangle','Obtusangle'],answer:a,explain:EXP[a==='Rectangle'?'TRectangle':a]})}
+function gSortTri(kind){const keys=kind==='sides'?['Equilàter','Isòsceles','Escalè']:['Acutangle','Rectangle','Obtusangle'];const src=kind==='sides'?TRI_SIDES:TRI_ANG;
+  let items=[];keys.forEach(k=>{const shapes=shuffle(src[k]);for(let j=0;j<2;j++){const p=fit(shapes[j%shapes.length],TRI_ROT());const info=triInfo(p);items.push({id:k+j,svg:triFig(p,pick(FILLS),null,'mini'),bin:kind==='sides'?info.sidesCls:info.angCls})}});
+  const desc=kind==='sides'?{'Equilàter':'tres costats iguals','Isòsceles':'dos costats iguals','Escalè':'tres costats desiguals'}:{'Acutangle':'tres angles aguts','Rectangle':'un angle recte','Obtusangle':'un angle obtús'};
+  const cols=['#E8557F','#3DA5E0','#86C185'];
+  return{type:'sort',key:'st'+kind,prompt:kind==='sides'?'Classifica els triangles segons els <u>costats</u>':'Classifica els triangles segons els <u>angles</u>',
+    bins:keys.map((k,i)=>({id:k,label:k,desc:desc[k],color:cols[i]})),items:shuffle(items),answerText:keys.map(k=>k+': '+desc[k]).join(' · '),explain:keys.map(k=>`<b>${k}</b>: ${desc[k]}`).join('<br>')}}
+
+function quadItem(name){const p=fit(pick(QUAD[name]),{flip:Math.random()<.5});const fill=pick(FILLS);return{p,fill}}
+function gQuadFamily(){const name=pick(['Quadrat','Rectangle','Rombe','Romboide','Trapezi','Trapezi','Trapezoide','Trapezoide']);const {p,fill}=quadItem(name);const fam=FAM[name];
+  return choice({key:'qf'+fam,prompt:'Quin tipus de quadrilàter és?<span class="sub">Fixa’t en els costats paral·lels</span>',svg:quadFig(p,fill),svgAfter:quadFig(p,fill,true),options:['Paral·lelogram','Trapezi','Trapezoide'],answer:fam,explain:EXP[fam]+(fam==='Paral·lelogram'?` En concret, és un <b>${name.toLowerCase()}</b>.`:'')})}
+function gQuadName(){const name=pick(['Quadrat','Rectangle','Rombe','Romboide','Trapezi','Trapezoide']);const {p,fill}=quadItem(name);
+  const others=shuffle(['Quadrat','Rectangle','Rombe','Romboide','Trapezi','Trapezoide'].filter(x=>x!==name)).slice(0,3);
+  return choice({key:'qn'+name,prompt:'Com es diu aquest quadrilàter?',svg:quadFig(p,fill),svgAfter:quadFig(p,fill,true),options:shuffle([name,...others]),answer:name,
+    explain:({Quadrat:EXP['Quadrat'],Rectangle:EXP['QRectangle'],Rombe:EXP['Rombe'],Romboide:EXP['Romboide'],Trapezi:EXP['Trapezi'],Trapezoide:EXP['Trapezoide']})[name]})}
+function gQuadText(){const Q=[['Quin paral·lelogram té 4 costats iguals i 4 angles rectes?','Quadrat'],['Quin paral·lelogram té 4 angles rectes i els costats iguals de dos en dos?','Rectangle'],
+  ['Quin paral·lelogram té 4 costats iguals però cap angle recte?','Rombe'],['Quin paral·lelogram està inclinat i té els costats iguals de dos en dos?','Romboide'],
+  ['Com es diu el quadrilàter que només té dos costats oposats paral·lels?','Trapezi'],['Com es diu el quadrilàter que no té cap costat paral·lel?','Trapezoide']];
+  const [q,a]=pick(Q);const opts=['Trapezi','Trapezoide'].includes(a)?['Paral·lelogram','Trapezi','Trapezoide']:['Quadrat','Rectangle','Rombe','Romboide'];
+  return choice({key:'qt'+q,prompt:q,options:opts,answer:a,explain:({Quadrat:EXP['Quadrat'],Rectangle:EXP['QRectangle'],Rombe:EXP['Rombe'],Romboide:EXP['Romboide'],Trapezi:EXP['Trapezi'],Trapezoide:EXP['Trapezoide']})[a]})}
+function gSortQuads(){const names=shuffle(['Quadrat','Rectangle','Rombe','Romboide']).slice(0,2).concat(['Trapezi','Trapezi','Trapezoide','Trapezoide']);
+  const items=shuffle(names.map((n,i)=>{const {p,fill}=quadItem(n);return{id:'q'+i,svg:quadFig(p,fill,false,'mini'),bin:FAM[n]}}));
+  return{type:'sort',key:'sq',prompt:'Classifica els quadrilàters',bins:[{id:'Paral·lelogram',label:'Paral·lelograms',desc:'costats paral·lels de dos en dos',color:'#E8557F'},{id:'Trapezi',label:'Trapezis',desc:'només dos costats paral·lels',color:'#3DA5E0'},{id:'Trapezoide',label:'Trapezoides',desc:'cap costat paral·lel',color:'#86C185'}],
+    items,answerText:'Paral·lelograms · Trapezis · Trapezoides',explain:'<b>Paral·lelograms</b>: costats paral·lels de dos en dos. <b>Trapezis</b>: només dos costats paral·lels. <b>Trapezoides</b>: cap costat paral·lel.'}}
+function gTF(topic){return()=>{const t=topic||pick(Object.keys(TF));const [s,v,e]=pick(TF[t]);return{type:'tf',key:'tf'+s,prompt:`Vertader o fals?<span class="sub" style="font-size:20px;color:#2b2d42;margin-top:12px">“${s}”</span>`,answer:v,answerText:v?'Vertader':'Fals',explain:e}}}
+
+/* ============ Missions ============ */
+const MISSIONS=[
+ {id:'linies',emoji:'📏',bg:'#ffe1ec',title:'Línies i rectes',desc:'Punt, recta, semirecta, segment, paral·leles…',gens:[gLineType,gLineType,gLineType,gLinePair,gLinePair,gLinePair,gLineText,gLineText,gTF('linies')]},
+ {id:'poligons',emoji:'⬢',bg:'#e0f0ff',title:'Els polígons',desc:'Noms segons els costats, regulars i irregulars',gens:[gPolyName,gPolyName,gPolyName,gPolyCount,gPolyCount,gRegular,gRegular,gTF('poligons'),gSortRegular]},
+ {id:'elements',emoji:'📍',bg:'#fff4c9',title:'Elements d’un polígon',desc:'Costats, vèrtexs, angles i diagonal',gens:[gTap,gTap,gTap,gTap,gElemName,gElemName,gElemCount,gElemCount,gTF('elements')]},
+ {id:'triangles',emoji:'🔺',bg:'#e3f5e1',title:'Els triangles',desc:'Segons els costats i segons els angles',gens:[gTriSides,gTriSides,gTriAngles,gTriAngles,gTriText,gTriText,gTF('triangles'),()=>gSortTri('sides'),()=>gSortTri('angles')]},
+ {id:'quadrilaters',emoji:'🟪',bg:'#efe6ff',title:'Els quadrilàters',desc:'Paral·lelograms, trapezis i trapezoides',gens:[gQuadFamily,gQuadFamily,gQuadName,gQuadName,gQuadName,gQuadText,gQuadText,gTF('quadrilaters'),gSortQuads]},
+];
+const FINAL={id:'final',emoji:'🏆',title:'Examen final',desc:'13 preguntes de tot el tema. Treu la teva nota!',final:true,
+  gens:[gLineType,gLinePair,gPolyName,gRegular,gTap,gElemName,gTriSides,gTriAngles,gTriText,gQuadFamily,gQuadName,gTF(),gSortQuads]};
+// 13 preguntes: la nota es calcula sobre 10
+
+/* ============ Recorda (fitxes de repàs) ============ */
+function rItem(svg,name,txt){return `<div class="ritem">${svg}<b>${name}</b><span>${txt}</span></div>`}
+function recordaHTML(id){
+  const R={};
+  R.linies=`<div class="rsec">📏 Línies</div><div class="rgrid">${rItem(lineFig('Punt',0,false,''),'Punt','marca un lloc')}${rItem(lineFig('Recta',0,true,''),'Recta','sense principi ni final')}${rItem(lineFig('Semirecta',0,true,''),'Semirecta','té principi, però no final')}${rItem(lineFig('Segment',0,false,''),'Segment','té principi i final')}</div>
+   <div class="rsec">Tipus de rectes</div><div class="rgrid">${rItem(pairFig('Rectes paral·leles',0,true,''),'Paral·leles','no es tallen mai')}${rItem(pairFig('Rectes perpendiculars',0,true,''),'Perpendiculars','es tallen fent una creu + (angle recte)')}${rItem(pairFig('Rectes secants',0,true,''),'Secants','es tallen inclinades, com una X')}</div>`;
+  R.poligons=`<div class="rsec">⬢ Polígons segons els costats</div><div class="rgrid">${[3,4,5,6,7,8,9,10].map(n=>rItem(polyFig(regPts(n),FILLS[n%FILLS.length],false,''),NOMS[n],n+' costats')).join('')}</div>
+   <div class="rsec">Regulars i irregulars</div><div class="rgrid">${rItem(polyFig(regPts(4),'#3DA5E0',true,''),'Regular','tots els costats iguals')}${rItem(polyFig(fit(IRR_SHAPES[0]),'#EFB46A',false,''),'Irregular','costats diferents')}</div>
+   <div class="rnote">💡 Truc: <b>penta</b>=5, <b>hexa</b>=6, <b>hepta</b>=7, <b>octo</b>=8 (com el pop 🐙), <b>ennea</b>=9, <b>deca</b>=10.</div>`;
+  const sq=fit(QUAD['Quadrat'][0]);
+  R.elements=`<div class="rsec">📍 Elements d’un polígon</div><div class="rgrid">${rItem(elemFig(sq,{hl:{t:'side',i:2}}).replace('class="fig"',''),'Costat','les línies que el tanquen')}${rItem(elemFig(sq,{hl:{t:'vertex',i:1}}).replace('class="fig"',''),'Vèrtex','on s’ajunten dos costats')}${rItem(elemFig(sq,{hl:{t:'angle',i:1}}).replace('class="fig"',''),'Angle','l’obertura entre dos costats')}${rItem(elemFig(sq,{hl:{t:'diagonal'}}).replace('class="fig"',''),'Diagonal','uneix dos vèrtexs no seguits')}</div>
+   <div class="rnote">💡 Un polígon té el mateix nombre de <b>costats</b>, <b>vèrtexs</b> i <b>angles</b>. Un triangle: 3, 3 i 3.</div>`;
+  const tS=k=>fit(TRI_SIDES[k][0]),tA=k=>fit(TRI_ANG[k][0]);
+  R.triangles=`<div class="rsec">🔺 Triangles segons els costats</div><div class="rgrid">${rItem(triFig(tS('Equilàter'),'#EFB46A','sides',''),'Equilàter','tres costats iguals')}${rItem(triFig(tS('Isòsceles'),'#F6D33C','sides',''),'Isòsceles','dos costats iguals')}${rItem(triFig(tS('Escalè'),'#86C185','sides',''),'Escalè','tres costats desiguals')}</div>
+   <div class="rsec">Triangles segons els angles</div><div class="rgrid">${rItem(triFig(tA('Acutangle'),'#3DA5E0','angles',''),'Acutangle','tres angles aguts')}${rItem(triFig(tA('Rectangle'),'#B8A4D9','angles',''),'Rectangle','un angle recte')}${rItem(triFig(tA('Obtusangle'),'#F28B66','angles',''),'Obtusangle','un angle obtús')}</div>
+   <div class="rnote">💡 Les marques als costats indiquen quins són iguals. Angle recte = com la cantonada d’un full.</div>`;
+  const q=n=>fit(QUAD[n][0]);
+  R.quadrilaters=`<div class="rsec">🟪 Paral·lelograms <small style="font-family:Nunito;font-size:15px;color:#6b6f85">costats paral·lels de dos en dos</small></div><div class="rgrid">${rItem(quadFig(q('Quadrat'),'#E8557F',true,''),'Quadrat','4 costats iguals, 4 angles rectes')}${rItem(quadFig(q('Rectangle'),'#B8A4D9',true,''),'Rectangle','4 angles rectes')}${rItem(quadFig(q('Rombe'),'#3DA5E0',true,''),'Rombe','4 costats iguals, sense angles rectes')}${rItem(quadFig(q('Romboide'),'#F6D33C',true,''),'Romboide','inclinat, sense angles rectes')}</div>
+   <div class="rsec">Trapezis i trapezoides</div><div class="rgrid">${rItem(quadFig(q('Trapezi'),'#C7E07A',true,''),'Trapezi','només dos costats oposats paral·lels')}${rItem(quadFig(fit(QUAD['Trapezi'][1]),'#EFB46A',true,''),'Trapezi','també és un trapezi!')}${rItem(quadFig(q('Trapezoide'),'#86C185',true,''),'Trapezoide','cap costat paral·lel')}</div>
+   <div class="rnote">💡 Els costats del <b>mateix color</b> són paral·lels. Els grisos no són paral·lels a cap altre.</div>`;
+  return id==='final'?Object.values(R).join(''):R[id];
+}
+function showRecorda(id){const d=document.createElement('div');d.className='modal';
+  d.innerHTML=`<div class="box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 class="ff">📖 Recorda!</h2><button class="ghostbtn" id="cl">Tanca ✕</button></div>${recordaHTML(id)}<div class="row"><button class="primary" id="cl2">Entesos! 👍</button></div></div>`;
+  document.body.appendChild(d);const close=()=>d.remove();d.querySelector('#cl').onclick=close;d.querySelector('#cl2').onclick=close;d.onclick=e=>{if(e.target===d)close()};}
+
+/* ============ Estat i pantalles ============ */
+const app=$('#app');let S=null;
+function loadStars(){try{return JSON.parse(localStorage.getItem('geo4-stars')||'{}')}catch(e){return{}}}
+function saveStars(id,v){try{const s=loadStars();if(!s[id]||v>s[id]){s[id]=v;localStorage.setItem('geo4-stars',JSON.stringify(s))}}catch(e){}}
+function starStr(n){return '⭐'.repeat(n)+'☆'.repeat(3-n)}
+
+function home(){S=null;const st=loadStars();window.scrollTo(0,0);
+  app.innerHTML=`<div class="hero"><h1 class="ff"><span>📐</span> Repte de <span style="color:#E8557F">G</span><span style="color:#3DA5E0">e</span><span style="color:#2fa36b">o</span><span style="color:#EFB46A">m</span><span style="color:#8E5BB5">e</span><span style="color:#E8557F">t</span><span style="color:#3DA5E0">r</span><span style="color:#2fa36b">i</span><span style="color:#EFB46A">a</span></h1><p>Supera les 5 missions i després fes l’examen final. Tu pots! 💪</p></div>
+  <div class="grid">${MISSIONS.map((m,i)=>`<button class="mcard" onclick="start(${i})"><div class="em" style="background:${m.bg}">${m.emoji}</div><div><h3 class="ff">${i+1}. ${m.title}</h3><small>${m.desc}</small><div class="stars">${starStr(st[m.id]||0)}</div></div></button>`).join('')}
+  <button class="mcard final" onclick="start(-1)"><div class="em">${FINAL.emoji}</div><div><h3 class="ff">${FINAL.title}</h3><small>${FINAL.desc}</small>${st.final?`<div class="stars" style="letter-spacing:0">Millor nota: <b>${st.final}</b></div>`:''}</div></button></div>
+  <div class="tip">📖 A cada missió tens el botó <b>Recorda</b> amb el resum de la llibreta. Si t’equivoques, llegeix l’explicació: així aprens! 🌟</div>`;}
+
+function start(i){const m=i<0?FINAL:MISSIONS[i];const keys=new Set();
+  let qs=m.gens.map(g=>{let q;for(let t=0;t<15;t++){q=g();if(!keys.has(q.key))break}keys.add(q.key);return q});
+  const sorts=qs.filter(q=>q.type==='sort');qs=shuffle(qs.filter(q=>q.type!=='sort')).concat(sorts);
+  S={m,qs,i:0,results:[]};renderQ();}
+
+const PRAISE=['Molt bé! 🎉','Genial! ⭐','Perfecte! 🙌','Ets una crac! 💪','Boníssim! 🌟','Ho has clavat! 🎯'];
+function renderQ(){const q=S.qs[S.i],m=S.m;window.scrollTo(0,0);const ok=S.results.filter(r=>r.ok).length;
+  app.innerHTML=`<div class="top"><button class="ghostbtn" onclick="home()">⟵ Menú</button><div class="mt">${m.emoji} ${m.title}</div><button class="ghostbtn" onclick="showRecorda('${m.id}')">📖 Recorda</button></div>
+   <div class="prog"><div style="width:${S.i/S.qs.length*100}%"></div></div><div class="count">Pregunta ${S.i+1} de ${S.qs.length} · ✅ ${ok} encerts</div>
+   <div class="qcard pop"><div class="prompt">${q.prompt}</div><div id="figbox">${q.svg||''}</div><div id="body"></div><div id="fb"></div></div>`;
+  const body=$('#body');
+  if(q.type==='choice'){body.innerHTML=`<div class="opts">${q.options.map(o=>`<button class="opt" data-v="${o}">${o}</button>`).join('')}</div>`;
+    body.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const v=b.dataset.v,good=v===q.answer;
+      body.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.v===q.answer)x.classList.add('right');else if(x===b)x.classList.add('wrong');else x.classList.add('dim')});
+      finish(good)});}
+  if(q.type==='tf'){body.innerHTML=`<div class="opts tf"><button class="opt" data-v="1">✔ Vertader</button><button class="opt" data-v="0">✘ Fals</button></div>`;
+    body.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{const v=b.dataset.v==='1',good=v===q.answer;
+      body.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if((x.dataset.v==='1')===q.answer)x.classList.add('right');else x.classList.add('wrong')});finish(good)});}
+  if(q.type==='tap'){body.innerHTML=`<div class="hint">Toca directament sobre el dibuix</div>`;const svg=$('#figbox svg');
+    svg.addEventListener('click',e=>{if(S.qs[S.i]!==q||q._done)return;const el=e.target.closest('[data-el]');if(!el)return;q._done=true;finish(el.dataset.el===q.answer,el.dataset.el)});}
+  if(q.type==='sort') renderSort(q);
+}
+function finish(good,picked){const q=S.qs[S.i];S.results.push({ok:good,q});
+  if(q.svgAfter) $('#figbox').innerHTML=q.svgAfter;
+  let msg;
+  if(q.type==='tap'&&!good) msg=`Has tocat ${({vertex:'un vèrtex',side:'un costat',angle:'un angle',diagonal:'la diagonal'})[picked]}. Ara t’ensenyem ${({vertex:'un vèrtex',side:'un costat',angle:'un angle',diagonal:'la diagonal'})[q.answer]} en rosa. `;
+  else msg=good?'':(q.type==='sort'?'':`La resposta correcta és <b>${q.answerText||q.answer}</b>. `);
+  $('#fb').innerHTML=`<div class="fb ${good?'ok':'ko'} pop"><b class="big">${good?pick(PRAISE):'Uy, gairebé! 💡'}</b>${msg}${q.explain||''}</div>
+   <div class="row"><button class="primary" id="nx">${S.i+1<S.qs.length?'Següent ➜':'Veure resultat 🏁'}</button></div>`;
+  $('#nx').onclick=()=>{S.i++;if(S.i<S.qs.length)renderQ();else results()};
+  $('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+/* ---- ordenar ---- */
+function renderSort(q){const body=$('#body');const st=q._st||(q._st={pos:{},sel:null,marks:{},first:null,done:false,tries:0});
+  const card=it=>`<div class="card ${st.sel===it.id?'sel':''} ${st.marks[it.id]||''}" data-id="${it.id}">${it.svg}</div>`;
+  const inTray=q.items.filter(it=>!st.pos[it.id]);const all=inTray.length===0;
+  body.innerHTML=`<div class="hint">Arrossega cada figura al seu calaix (o toca la figura i després el calaix)</div>
+   <div class="tray" data-bin="tray">${inTray.map(card).join('')||'<span class="hint" style="align-self:center">Totes col·locades! Prem <b>Comprova</b> 👇</span>'}</div>
+   <div class="bins">${q.bins.map(b=>`<div class="bin" data-bin="${b.id}" style="--c:${b.color}"><div class="bt">${b.label}</div><div class="bd">${b.desc}</div><div class="bc">${q.items.filter(it=>st.pos[it.id]===b.id).map(card).join('')}</div></div>`).join('')}</div>
+   ${st.done?'':`<div class="row"><button class="primary" id="chk" ${all?'':'disabled'}>Comprova ✔</button>${st.tries>0?'<button class="secondary" id="sol">Veure la solució</button>':''}</div>`}`;
+  if(st.done) return;
+  const move=(id,bin)=>{if(bin==='tray')delete st.pos[id];else st.pos[id]=bin;delete st.marks[id];st.sel=null;renderSort(q)};
+  body.querySelectorAll('[data-bin]').forEach(b=>b.addEventListener('click',()=>{if(st.sel)move(st.sel,b.dataset.bin)}));
+  body.querySelectorAll('.card').forEach(c=>{c.addEventListener('click',e=>e.stopPropagation());
+    c.addEventListener('pointerdown',e=>{e.preventDefault();const sx=e.clientX,sy=e.clientY,r=c.getBoundingClientRect();let ghost=null,over=null;
+      try{c.setPointerCapture(e.pointerId)}catch(_){}
+      const mv=ev=>{if(!ghost&&Math.hypot(ev.clientX-sx,ev.clientY-sy)>6){ghost=c.cloneNode(true);ghost.classList.add('ghost');ghost.classList.remove('sel');ghost.style.width=r.width+'px';document.body.appendChild(ghost);c.classList.add('dragging')}
+        if(ghost){ghost.style.left=(ev.clientX-r.width/2)+'px';ghost.style.top=(ev.clientY-r.height/2)+'px';
+          const el=document.elementFromPoint(ev.clientX,ev.clientY);const b=el&&el.closest('[data-bin]');if(over&&over!==b)over.classList.remove('over');if(b){b.classList.add('over');over=b}}};
+      const up=ev=>{c.removeEventListener('pointermove',mv);c.removeEventListener('pointerup',up);c.removeEventListener('pointercancel',up);
+        if(ghost){ghost.remove();c.classList.remove('dragging');if(over)over.classList.remove('over');const el=document.elementFromPoint(ev.clientX,ev.clientY);const b=el&&el.closest('[data-bin]');if(b)move(c.dataset.id,b.dataset.bin)}
+        else{st.sel=st.sel===c.dataset.id?null:c.dataset.id;renderSort(q)}};
+      c.addEventListener('pointermove',mv);c.addEventListener('pointerup',up);c.addEventListener('pointercancel',up);});});
+  const chk=$('#chk');if(chk)chk.onclick=()=>{st.tries++;let allOk=true;q.items.forEach(it=>{const ok=st.pos[it.id]===it.bin;st.marks[it.id]=ok?'ok':'ko';if(!ok)allOk=false});
+    if(st.first===null)st.first=allOk;
+    if(allOk){st.done=true;renderSort(q);finish(st.first);if(!st.first)$('#fb .big').textContent='Ara sí! 👏 (a la primera no ha sortit)';}
+    else{renderSort(q);$('#fb').innerHTML=`<div class="fb info pop"><b class="big">Quasi! 🔍</b>Les figures amb vora <b style="color:#e5484d">vermella</b> no estan al lloc correcte. Mou-les i torna a comprovar.<br><small>${q.explain}</small></div>`}};
+  const sol=$('#sol');if(sol)sol.onclick=()=>{q.items.forEach(it=>{st.pos[it.id]=it.bin;st.marks[it.id]='ok'});st.done=true;if(st.first===null)st.first=false;renderSort(q);finish(false)};
+}
+
+/* ---- resultats ---- */
+function confetti(){const em=['🎉','⭐','🌟','✨','🔺','🟪','📐'];for(let i=0;i<40;i++){const s=document.createElement('div');s.className='confetti';s.textContent=pick(em);s.style.left=Math.random()*100+'vw';s.style.animationDuration=(2+Math.random()*2.5)+'s';s.style.animationDelay=Math.random()*.8+'s';document.body.appendChild(s);setTimeout(()=>s.remove(),5500)}}
+function results(){const m=S.m,N=S.results.length,ok=S.results.filter(r=>r.ok).length,pct=ok/N;window.scrollTo(0,0);
+  const stars=pct>=.9?3:pct>=.7?2:pct>=.5?1:0;
+  const errs=S.results.filter(r=>!r.ok);
+  const review=errs.length?`<div class="review"><h3 class="ff" style="margin:0">Per repassar 🔍</h3>${errs.map(r=>`<div class="it" style="display:flex;gap:12px;align-items:center">${r.q.svgAfter?`<div style="width:110px;flex:none">${r.q.svgAfter}</div>`:''}<div>${r.q.prompt.replace(/<span class="sub"[^>]*>/,' — ').replace(/<\/span>/,'')}<br>✅ <b>${r.q.answerText||(r.q.type==='tf'?(r.q.answer?'Vertader':'Fals'):r.q.answer)}</b></div></div>`).join('')}</div>`:'';
+  let head;
+  if(m.final){const nota=Math.round(pct*100)/10;saveStars('final',String(nota).replace('.',','));
+    const msg=nota>=9?'Excel·lent! Estàs preparadíssima per a l’examen! 🏆':nota>=7?'Molt bé! Repassa els errors i serà perfecte. 👏':nota>=5?'Aprovat! Repassa les missions on has fallat i torna-ho a provar. 💪':'Encara cal practicar una mica. Fes les missions i torna-ho a provar! 📚';
+    head=`<div class="nota">${String(nota).replace('.',',')}<small> / 10</small></div><p style="font-size:20px;font-weight:800">${ok} de ${N} encerts</p><p style="font-size:19px">${msg}</p>`;}
+  else{saveStars(m.id,stars);const msg=stars===3?'Missió superada amb nota! 🏅':stars===2?'Molt bé! Una mica més i tindràs les 3 estrelles.':stars===1?'Bé! Mira el “Recorda” i torna-ho a provar.':'Cal practicar més: llegeix el “Recorda” i torna-hi! 💪';
+    head=`<div class="bigstars">${starStr(stars)}</div><p style="font-size:22px;font-weight:800;margin:4px 0">${ok} de ${N} encerts</p><p style="font-size:19px">${msg}</p>`;}
+  app.innerHTML=`<div class="qcard res pop"><h2 class="ff" style="margin:0;font-size:30px">${m.emoji} ${m.title}</h2>${head}
+    <div class="row"><button class="primary" onclick="start(${m.final?-1:MISSIONS.indexOf(m)})">🔄 Torna-ho a provar</button><button class="secondary" onclick="home()">🏠 Menú</button>${!m.final&&MISSIONS.indexOf(m)<MISSIONS.length-1?`<button class="secondary" onclick="start(${MISSIONS.indexOf(m)+1})">Següent missió ➜</button>`:''}</div>${review}</div>`;
+  if(pct>=.7)confetti();}
+home();
+</script>
+</body>
+</html>
