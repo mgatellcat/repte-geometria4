@@ -102,6 +102,43 @@ button{font-family:inherit;cursor:pointer}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
 @keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
 .pop{animation:pop .35s ease}
+/* usuari */
+.login{max-width:520px;margin:40px auto 0;text-align:center}
+.login .qcard{padding:28px 24px 26px}
+.login h2{font-size:clamp(26px,4vw,34px);margin:6px 0 4px}
+.login p{color:var(--muted);font-size:18px;margin:0 0 16px}
+.login input{width:100%;font-family:Fredoka,Nunito,sans-serif;font-size:26px;font-weight:600;text-align:center;padding:14px 16px;border:3px solid var(--ink);border-radius:18px;outline:none;color:var(--ink);background:#fffdf3}
+.login input:focus{box-shadow:0 0 0 5px #ffe28a}
+.login .err{color:var(--ko);font-weight:800;min-height:24px;margin-top:8px}
+.who{margin-top:22px;border-top:3px dashed #e3e9f1;padding-top:14px}
+.who .lbl{font-weight:800;color:var(--muted);font-size:15px}
+.chips{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:10px}
+.chip{background:#fff;border:2.5px solid var(--ink);border-radius:30px;padding:8px 16px;font-weight:800;font-size:17px;color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.chip:hover{background:#fff8de}
+.userbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hello{font-family:Fredoka;font-size:22px;font-weight:600}
+/* recorda ben visible */
+.rbanner{margin-top:24px;background:linear-gradient(120deg,#fff3c4,#ffe08a);border:3px solid var(--ink);border-radius:22px;box-shadow:6px 6px 0 var(--ink);padding:16px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.rbanner .book{font-size:52px;line-height:1;animation:wiggle 2.6s ease-in-out infinite;flex:none}
+.rbanner .txt{flex:1;min-width:220px}
+.rbanner h3{margin:0;font-size:26px}
+.rbanner p{margin:2px 0 0;font-weight:700;font-size:16px}
+.rbanner .chips{justify-content:flex-start;margin-top:10px}
+.rbtn{background:var(--sun);color:var(--ink);border:3px solid var(--ink);border-radius:14px;padding:9px 16px;font-weight:800;font-size:16px;box-shadow:3px 3px 0 var(--ink);animation:glow 2.4s ease-in-out infinite}
+.rbtn:hover{filter:brightness(1.05);transform:translateY(-1px)}
+.mrec{display:inline-block;margin-top:6px;background:#fff3c4;border:2px solid var(--ink);border-radius:10px;padding:3px 9px;font-weight:800;font-size:13.5px;color:var(--ink)}
+.mrec:hover{background:var(--sun)}
+.mcard{cursor:pointer}
+.modal .rhead{background:linear-gradient(120deg,#fff3c4,#ffe08a);margin:-20px -22px 0;padding:16px 22px 14px;border-radius:21px 21px 0 0;border-bottom:3px solid var(--ink)}
+.modal .rhead h2{font-size:32px}
+.modal .rhead p{margin:4px 0 0;font-weight:700;font-size:17px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tab{background:#fff;border:2.5px solid var(--ink);border-radius:30px;padding:7px 13px;font-weight:800;font-size:15px;color:var(--ink)}
+.tab.on{background:var(--ink);color:#fff}
+@keyframes wiggle{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-12deg)}90%{transform:rotate(10deg)}95%{transform:rotate(-6deg)}}
+@keyframes glow{0%,100%{box-shadow:3px 3px 0 var(--ink),0 0 0 0 rgba(255,201,60,.0)}50%{box-shadow:3px 3px 0 var(--ink),0 0 0 6px rgba(255,201,60,.45)}}
+@media (max-width:560px){.rbanner{flex-direction:column;text-align:center}.rbanner .chips{justify-content:center}.rbanner .txt{min-width:0}}
+@media (prefers-reduced-motion:reduce){.rbanner .book,.rbtn{animation:none}}
 </style>
 </head>
 <body>
@@ -425,30 +462,66 @@ function recordaHTML(id){
    <div class="rnote">💡 Els costats del <b>mateix color</b> són paral·lels. Els grisos no són paral·lels a cap altre.</div>`;
   return id==='final'?Object.values(R).join(''):R[id];
 }
-function showRecorda(id){const d=document.createElement('div');d.className='modal';
-  d.innerHTML=`<div class="box"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 class="ff">📖 Recorda!</h2><button class="ghostbtn" id="cl">Tanca ✕</button></div>${recordaHTML(id)}<div class="row"><button class="primary" id="cl2">Entesos! 👍</button></div></div>`;
-  document.body.appendChild(d);const close=()=>d.remove();d.querySelector('#cl').onclick=close;d.querySelector('#cl2').onclick=close;d.onclick=e=>{if(e.target===d)close()};}
+// opts: {intro:true} quan s'obre sol en començar una missió; onClose: què fer en tancar
+function showRecorda(id,opts={}){const old=$('.modal');if(old)old.remove();
+  const d=document.createElement('div');d.className='modal';let cur=id||'linies';
+  const tabs=[...MISSIONS.map(m=>({id:m.id,label:m.emoji+' '+m.title})),{id:'final',label:'📚 Tot el tema'}];
+  const sub=opts.intro?`Abans de començar, ${USER?esc(USER)+', ':''}llegeix el resum de la llibreta. Si dubtes, el pots tornar a obrir quan vulguis amb el botó <b>📖 Recorda</b>!`:'El resum de la llibreta per no oblidar res.';
+  const draw=()=>{d.innerHTML=`<div class="box"><div class="rhead"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><h2 class="ff">📖 Recorda!</h2><button class="ghostbtn" id="cl">Tanca ✕</button></div><p>${sub}</p></div>
+    <div class="tabs">${tabs.map(t=>`<button class="tab ${t.id===cur?'on':''}" data-t="${t.id}">${t.label}</button>`).join('')}</div>
+    ${recordaHTML(cur)}<div class="row"><button class="primary" id="cl2">${opts.intro?'Ja ho tinc, comencem! 🚀':'Entesos! 👍'}</button></div></div>`;
+    d.querySelector('#cl').onclick=close;d.querySelector('#cl2').onclick=close;
+    d.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=b.dataset.t;draw();d.scrollTop=0});};
+  const close=()=>{d.remove();document.removeEventListener('keydown',esck);if(opts.onClose)opts.onClose()};
+  const esck=e=>{if(e.key==='Escape')close()};
+  draw();document.body.appendChild(d);d.onclick=e=>{if(e.target===d)close()};document.addEventListener('keydown',esck);}
 
 /* ============ Estat i pantalles ============ */
 const app=$('#app');let S=null;
-function loadStars(){try{return JSON.parse(localStorage.getItem('geo4-stars')||'{}')}catch(e){return{}}}
-function saveStars(id,v){try{const s=loadStars();if(!s[id]||v>s[id]){s[id]=v;localStorage.setItem('geo4-stars',JSON.stringify(s))}}catch(e){}}
+/* Usuari: es demana el nom cada vegada que s'obre l'aplicació. El progrés es guarda per a cada nom. */
+let USER=null;
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ukey=n=>'geo4-u:'+n.trim().toLowerCase();
+function lsGet(k,def){try{const v=localStorage.getItem(k);return v?JSON.parse(v):def}catch(e){return def}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function loadUser(){const u=USER?lsGet(ukey(USER),{}):{};u.stars=u.stars||{};u.seen=u.seen||{};return u}
+function saveUser(u){if(USER)lsSet(ukey(USER),u)}
+function knownUsers(){return lsGet('geo4-users',[])}
+function login(name){name=name.trim().replace(/\s+/g,' ');USER=name;
+  let list=knownUsers().filter(n=>n.toLowerCase()!==name.toLowerCase());list.unshift(name);lsSet('geo4-users',list.slice(0,12));
+  // estrelles antigues (d'abans que hi hagués usuaris): passen al primer nom que entri
+  const legacy=lsGet('geo4-stars',null);if(legacy){const u=loadUser();u.stars=Object.assign({},legacy,u.stars);saveUser(u);try{localStorage.removeItem('geo4-stars')}catch(e){}}
+  home();}
+function askName(){S=null;USER=null;window.scrollTo(0,0);const list=knownUsers();
+  app.innerHTML=`<div class="login"><div class="qcard pop"><div style="font-size:60px;line-height:1">📐👋</div><h2 class="ff">Hola! Com et dius?</h2><p>Escriu el teu nom per guardar les teves estrelles.</p>
+    <form id="lf" autocomplete="off"><input id="nm" maxlength="20" placeholder="El teu nom" aria-label="El teu nom"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button></div></form>
+    ${list.length?`<div class="who"><div class="lbl">Ja has jugat abans? Toca el teu nom:</div><div class="chips">${list.map((n,i)=>`<button class="chip" data-i="${i}">🙂 ${esc(n)}</button>`).join('')}</div></div>`:''}
+  </div></div>`;
+  const nm=$('#nm');setTimeout(()=>nm.focus(),50);
+  $('#lf').onsubmit=e=>{e.preventDefault();const v=nm.value.trim();if(!v){$('#er').textContent='Escriu el teu nom, si us plau ✏️';nm.focus();return}login(v)};
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>login(list[+b.dataset.i]));}
+function loadStars(){return loadUser().stars}
+function saveStars(id,v){const u=loadUser();const old=u.stars[id];const better=old===undefined||(typeof v==='string'?parseFloat(v.replace(',','.'))>parseFloat(String(old).replace(',','.')):v>old);if(better){u.stars[id]=v;saveUser(u)}}
 function starStr(n){return '⭐'.repeat(n)+'☆'.repeat(3-n)}
 
-function home(){S=null;const st=loadStars();window.scrollTo(0,0);
-  app.innerHTML=`<div class="hero"><h1 class="ff"><span>📐</span> Repte de <span style="color:#E8557F">G</span><span style="color:#3DA5E0">e</span><span style="color:#2fa36b">o</span><span style="color:#EFB46A">m</span><span style="color:#8E5BB5">e</span><span style="color:#E8557F">t</span><span style="color:#3DA5E0">r</span><span style="color:#2fa36b">i</span><span style="color:#EFB46A">a</span></h1><p>Supera les 5 missions i després fes l’examen final. Tu pots! 💪</p></div>
-  <div class="grid">${MISSIONS.map((m,i)=>`<button class="mcard" onclick="start(${i})"><div class="em" style="background:${m.bg}">${m.emoji}</div><div><h3 class="ff">${i+1}. ${m.title}</h3><small>${m.desc}</small><div class="stars">${starStr(st[m.id]||0)}</div></div></button>`).join('')}
+function home(){if(!USER)return askName();S=null;const st=loadStars();window.scrollTo(0,0);const old=$('.modal');if(old)old.remove();
+  app.innerHTML=`<div class="userbar"><div class="hello">👋 Hola, <span style="color:var(--acc)">${esc(USER)}</span>!</div><button class="ghostbtn" onclick="askName()">🔁 No sóc ${esc(USER)}</button></div>
+  <div class="hero"><h1 class="ff"><span>📐</span> Repte de <span style="white-space:nowrap"><span style="color:#E8557F">G</span><span style="color:#3DA5E0">e</span><span style="color:#2fa36b">o</span><span style="color:#EFB46A">m</span><span style="color:#8E5BB5">e</span><span style="color:#E8557F">t</span><span style="color:#3DA5E0">r</span><span style="color:#2fa36b">i</span><span style="color:#EFB46A">a</span></span></h1><p>Supera les 5 missions i després fes l’examen final. Tu pots! 💪</p></div>
+  <div class="grid">${MISSIONS.map((m,i)=>`<div class="mcard" role="button" tabindex="0" onclick="start(${i})" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();start(${i})}"><div class="em" style="background:${m.bg}">${m.emoji}</div><div><h3 class="ff">${i+1}. ${m.title}</h3><small>${m.desc}</small><div class="stars">${starStr(st[m.id]||0)}</div><button class="mrec" onclick="event.stopPropagation();showRecorda('${m.id}')">📖 Recorda</button></div></div>`).join('')}
   <button class="mcard final" onclick="start(-1)"><div class="em">${FINAL.emoji}</div><div><h3 class="ff">${FINAL.title}</h3><small>${FINAL.desc}</small>${st.final?`<div class="stars" style="letter-spacing:0">Millor nota: <b>${st.final}</b></div>`:''}</div></button></div>
-  <div class="tip">📖 A cada missió tens el botó <b>Recorda</b> amb el resum de la llibreta. Si t’equivoques, llegeix l’explicació: així aprens! 🌟</div>`;}
+  <div class="rbanner"><div class="book">📖</div><div class="txt"><h3 class="ff">Recorda!</h3><p>El resum de la llibreta amb tots els dibuixos. Llegeix-lo abans de cada missió i torna-hi sempre que dubtis!</p>
+    <div class="chips">${MISSIONS.map(m=>`<button class="chip" onclick="showRecorda('${m.id}')">${m.emoji} ${m.title}</button>`).join('')}<button class="chip" onclick="showRecorda('final')">📚 Tot el tema</button></div></div></div>
+  <div class="tip">Si t’equivoques, llegeix l’explicació i obre el <b>📖 Recorda</b>: així aprens! 🌟</div>`;}
 
 function start(i){const m=i<0?FINAL:MISSIONS[i];const keys=new Set();
   let qs=m.gens.map(g=>{let q;for(let t=0;t<15;t++){q=g();if(!keys.has(q.key))break}keys.add(q.key);return q});
   const sorts=qs.filter(q=>q.type==='sort');qs=shuffle(qs.filter(q=>q.type!=='sort')).concat(sorts);
-  S={m,qs,i:0,results:[]};renderQ();}
+  S={m,qs,i:0,results:[]};renderQ();
+  const u=loadUser();if(!u.seen[m.id]){u.seen[m.id]=1;saveUser(u);showRecorda(m.id,{intro:true})}}
 
 const PRAISE=['Molt bé! 🎉','Genial! ⭐','Perfecte! 🙌','Ets una crac! 💪','Boníssim! 🌟','Ho has clavat! 🎯'];
 function renderQ(){const q=S.qs[S.i],m=S.m;window.scrollTo(0,0);const ok=S.results.filter(r=>r.ok).length;
-  app.innerHTML=`<div class="top"><button class="ghostbtn" onclick="home()">⟵ Menú</button><div class="mt">${m.emoji} ${m.title}</div><button class="ghostbtn" onclick="showRecorda('${m.id}')">📖 Recorda</button></div>
+  app.innerHTML=`<div class="top"><button class="ghostbtn" onclick="home()">⟵ Menú</button><div class="mt">${m.emoji} ${m.title}</div><button class="rbtn" onclick="showRecorda('${m.id}')">📖 Recorda</button></div>
    <div class="prog"><div style="width:${S.i/S.qs.length*100}%"></div></div><div class="count">Pregunta ${S.i+1} de ${S.qs.length} · ✅ ${ok} encerts</div>
    <div class="qcard pop"><div class="prompt">${q.prompt}</div><div id="figbox">${q.svg||''}</div><div id="body"></div><div id="fb"></div></div>`;
   const body=$('#body');
@@ -468,8 +541,8 @@ function finish(good,picked){const q=S.qs[S.i];S.results.push({ok:good,q});
   let msg;
   if(q.type==='tap'&&!good) msg=`Has tocat ${({vertex:'un vèrtex',side:'un costat',angle:'un angle',diagonal:'la diagonal'})[picked]}. Ara t’ensenyem ${({vertex:'un vèrtex',side:'un costat',angle:'un angle',diagonal:'la diagonal'})[q.answer]} en rosa. `;
   else msg=good?'':(q.type==='sort'?'':`La resposta correcta és <b>${q.answerText||q.answer}</b>. `);
-  $('#fb').innerHTML=`<div class="fb ${good?'ok':'ko'} pop"><b class="big">${good?pick(PRAISE):'Uy, gairebé! 💡'}</b>${msg}${q.explain||''}</div>
-   <div class="row"><button class="primary" id="nx">${S.i+1<S.qs.length?'Següent ➜':'Veure resultat 🏁'}</button></div>`;
+  $('#fb').innerHTML=`<div class="fb ${good?'ok':'ko'} pop"><b class="big">${good?pick(PRAISE)+(Math.random()<.5?' '+esc(USER):''):'Uy, gairebé! 💡'}</b>${msg}${q.explain||''}</div>
+   <div class="row">${good?'':`<button class="rbtn" style="font-size:18px;padding:12px 18px;border-radius:18px" onclick="showRecorda('${S.m.id}')">📖 Mira el Recorda</button>`}<button class="primary" id="nx">${S.i+1<S.qs.length?'Següent ➜':'Veure resultat 🏁'}</button></div>`;
   $('#nx').onclick=()=>{S.i++;if(S.i<S.qs.length)renderQ();else results()};
   $('#nx').scrollIntoView({behavior:'smooth',block:'nearest'});
 }
@@ -514,10 +587,10 @@ function results(){const m=S.m,N=S.results.length,ok=S.results.filter(r=>r.ok).l
     head=`<div class="nota">${String(nota).replace('.',',')}<small> / 10</small></div><p style="font-size:20px;font-weight:800">${ok} de ${N} encerts</p><p style="font-size:19px">${msg}</p>`;}
   else{saveStars(m.id,stars);const msg=stars===3?'Missió superada amb nota! 🏅':stars===2?'Molt bé! Una mica més i tindràs les 3 estrelles.':stars===1?'Bé! Mira el “Recorda” i torna-ho a provar.':'Cal practicar més: llegeix el “Recorda” i torna-hi! 💪';
     head=`<div class="bigstars">${starStr(stars)}</div><p style="font-size:22px;font-weight:800;margin:4px 0">${ok} de ${N} encerts</p><p style="font-size:19px">${msg}</p>`;}
-  app.innerHTML=`<div class="qcard res pop"><h2 class="ff" style="margin:0;font-size:30px">${m.emoji} ${m.title}</h2>${head}
-    <div class="row"><button class="primary" onclick="start(${m.final?-1:MISSIONS.indexOf(m)})">🔄 Torna-ho a provar</button><button class="secondary" onclick="home()">🏠 Menú</button>${!m.final&&MISSIONS.indexOf(m)<MISSIONS.length-1?`<button class="secondary" onclick="start(${MISSIONS.indexOf(m)+1})">Següent missió ➜</button>`:''}</div>${review}</div>`;
+  app.innerHTML=`<div class="qcard res pop"><h2 class="ff" style="margin:0;font-size:30px">${m.emoji} ${m.title}</h2><p style="margin:4px 0 0;font-weight:800;color:var(--muted)">🙂 ${esc(USER)}</p>${head}
+    <div class="row"><button class="primary" onclick="start(${m.final?-1:MISSIONS.indexOf(m)})">🔄 Torna-ho a provar</button>${pct<1?`<button class="rbtn" style="font-size:18px;padding:13px 20px;border-radius:18px" onclick="showRecorda('${m.id}')">📖 Repassa el Recorda</button>`:''}<button class="secondary" onclick="home()">🏠 Menú</button>${!m.final&&MISSIONS.indexOf(m)<MISSIONS.length-1?`<button class="secondary" onclick="start(${MISSIONS.indexOf(m)+1})">Següent missió ➜</button>`:''}</div>${review}</div>`;
   if(pct>=.7)confetti();}
-home();
+askName();
 </script>
 </body>
 </html>
