@@ -109,6 +109,8 @@ button{font-family:inherit;cursor:pointer}
 .login p{color:var(--muted);font-size:18px;margin:0 0 16px}
 .login input{width:100%;font-family:Fredoka,Nunito,sans-serif;font-size:26px;font-weight:600;text-align:center;padding:14px 16px;border:3px solid var(--ink);border-radius:18px;outline:none;color:var(--ink);background:#fffdf3}
 .login input:focus{box-shadow:0 0 0 5px #ffe28a}
+.login input.pin{font-size:34px;letter-spacing:14px;max-width:240px;display:block;margin:6px auto 0;padding:10px 12px 10px 26px}
+.login .lbl{font-weight:800;color:var(--muted);font-size:15px}
 .login .err{color:var(--ko);font-weight:800;min-height:24px;margin-top:8px}
 .who{margin-top:22px;border-top:3px dashed #e3e9f1;padding-top:14px}
 .who .lbl{font-weight:800;color:var(--muted);font-size:15px}
@@ -490,7 +492,7 @@ function knownUsers(){return lsGet('geo4-users',[])}
 // existeix si té dades guardades o si ja havia entrat abans (llista interna, no es mostra mai)
 function userExists(name){const k=name.trim().toLowerCase();return lsGet(ukey(name),null)!==null||knownUsers().some(n=>n.toLowerCase()===k)}
 const cleanName=n=>n.trim().replace(/\s+/g,' ');
-function login(name){name=cleanName(name);USER=name;
+function login(name){name=cleanName(name);const rec=lsGet(ukey(name),null);if(rec&&rec.name)name=rec.name;USER=name;
   const list=knownUsers().filter(n=>n.toLowerCase()!==name.toLowerCase());list.push(name);lsSet('geo4-users',list);
   const u=loadUser();if(!u.name){u.name=name;u.created=Date.now()}saveUser(u);
   home();}
@@ -501,28 +503,62 @@ function suggestNames(name){const out=[],max=20;const first=name[0].toLowerCase(
   add(name.slice(0,max-2)+'_'+first);add(name.slice(0,max-3)+'_'+two);
   for(let i=2;out.length<4&&i<100;i++)add(name.slice(0,max-2-String(i).length)+'_'+first+i);
   return out}
-function loginCard(inner){S=null;USER=null;window.scrollTo(0,0);app.innerHTML=`<div class="login"><div class="qcard pop">${inner}</div></div>`}
+function loginCard(inner){S=null;USER=null;window.scrollTo(0,0);const old=$('.modal');if(old)old.remove();app.innerHTML=`<div class="login"><div class="qcard pop">${inner}</div></div>`}
+/* PIN de 4 xifres: no es guarda tal qual, només una empremta */
+function pinHash(name,pin){const t='geo4|'+name.trim().toLowerCase()+'|'+pin;let h=5381;for(let i=0;i<t.length;i++)h=((h*33)^t.charCodeAt(i))>>>0;return h.toString(36)}
+function hasPin(name){const u=lsGet(ukey(name),null);return !!(u&&u.pin)}
+function checkPin(name,pin){const u=lsGet(ukey(name),null);return !!(u&&u.pin===pinHash(name,pin))}
+function setPin(name,pin){const u=lsGet(ukey(name),{})||{};u.pin=pinHash(name,pin);lsSet(ukey(name),u)}
+const pinInput=(id,label)=>`<input id="${id}" class="pin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" aria-label="${label}" autocomplete="off">`;
+const onlyDigits=el=>el.addEventListener('input',()=>{el.value=el.value.replace(/\D/g,'').slice(0,4)});
 function askName(){
   loginCard(`<div style="font-size:60px;line-height:1">📐👋</div><h2 class="ff">Hola! Com et dius?</h2><p>Escriu el teu nom per guardar les teves estrelles.</p>
     <form id="lf" autocomplete="off"><input id="nm" maxlength="20" placeholder="El teu nom" aria-label="El teu nom" autocomplete="off"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button></div></form>`);
   const nm=$('#nm');setTimeout(()=>nm.focus(),50);
   $('#lf').onsubmit=e=>{e.preventDefault();const v=cleanName(nm.value);if(!v){$('#er').textContent='Escriu el teu nom, si us plau ✏️';nm.focus();return}
-    if(userExists(v))askSame(v);else login(v)};}
-// el nom ja s'ha fet servir en aquest ordinador: és la mateixa persona o una altra?
+    if(userExists(v))askSame(v);else choosePin(v)};}
+// nom nou: tria un PIN i el repeteix
+function choosePin(name,existing=false){
+  loginCard(`<div style="font-size:56px;line-height:1">🔐</div><h2 class="ff">${existing?'Posa’t un PIN':'Hola, '+esc(name)+'!'}</h2><p>Tria un <b>PIN de 4 números</b> i recorda’l bé. El necessitaràs per tornar a entrar.</p>
+    <form id="pf" autocomplete="off"><div class="lbl">El teu PIN</div>${pinInput('p1','El teu PIN')}<div class="lbl" style="margin-top:12px">Torna’l a escriure</div>${pinInput('p2','Repeteix el PIN')}
+    <div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Guarda i entra 🚀</button><button class="ghostbtn" type="button" id="bk">⟵ Torna enrere</button></div></form>
+    <div class="rnote" style="margin-top:14px;font-size:15px">💡 No diguis el teu PIN a ningú. Pots apuntar-lo a l’agenda.</div>`);
+  const p1=$('#p1'),p2=$('#p2');onlyDigits(p1);onlyDigits(p2);setTimeout(()=>p1.focus(),50);
+  p1.addEventListener('input',()=>{if(p1.value.length===4)p2.focus()});
+  $('#bk').onclick=askName;
+  $('#pf').onsubmit=e=>{e.preventDefault();const er=$('#er');
+    if(p1.value.length!==4){er.textContent='El PIN ha de tenir 4 números 🔢';p1.focus();return}
+    if(p1.value!==p2.value){er.textContent='Els dos PIN no són iguals. Torna-ho a provar!';p2.value='';p2.focus();return}
+    if(!existing&&userExists(name)){askSame(name);return}
+    setPin(name,p1.value);login(name)};}
+// el nom ja existeix: si ets tu, escriu el PIN; si no, tria un altre nom
 function askSame(name){
-  loginCard(`<div style="font-size:56px;line-height:1">🤔</div><h2 class="ff">Ja hi ha algú que es diu «${esc(name)}»</h2><p>Ets tu, que ja havies jugat abans?</p>
-    <div class="row"><button class="primary" id="yes">✅ Sí, sóc jo</button><button class="secondary" id="no">🙋 No, sóc una altra persona</button></div>
-    <div class="row" style="margin-top:10px"><button class="ghostbtn" id="bk">⟵ Torna enrere</button></div>`);
-  $('#yes').onclick=()=>login(name);$('#no').onclick=()=>pickNew(name);$('#bk').onclick=askName;}
+  if(!hasPin(name)){ // usuari d'abans que hi hagués PIN
+    loginCard(`<div style="font-size:56px;line-height:1">🤔</div><h2 class="ff">Ja hi ha algú que es diu «${esc(name)}»</h2><p>Ets tu, que ja havies jugat abans?</p>
+      <div class="row"><button class="primary" id="yes">✅ Sí, sóc jo</button><button class="secondary" id="no">🙋 No, sóc una altra persona</button></div>
+      <div class="row" style="margin-top:10px"><button class="ghostbtn" id="bk">⟵ Torna enrere</button></div>`);
+    $('#yes').onclick=()=>choosePin(name,true);$('#no').onclick=()=>pickNew(name);$('#bk').onclick=askName;return}
+  let fails=0;
+  loginCard(`<div style="font-size:56px;line-height:1">🔐</div><h2 class="ff">Ja hi ha algú que es diu «${esc(name)}»</h2><p>Si ets tu, escriu el teu <b>PIN</b>.</p>
+    <form id="pf" autocomplete="off">${pinInput('p1','El teu PIN')}<div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Entra ✅</button></div></form>
+    <div class="who"><div class="lbl">No ets tu?</div><div class="row" style="margin-top:8px"><button class="secondary" id="no">🙋 Sóc una altra persona</button><button class="ghostbtn" id="bk">⟵ Torna enrere</button></div>
+    <div id="forgot"></div></div>`);
+  const p1=$('#p1');onlyDigits(p1);setTimeout(()=>p1.focus(),50);
+  $('#no').onclick=()=>pickNew(name);$('#bk').onclick=askName;
+  const tryPin=()=>{if(checkPin(name,p1.value)){login(name);return}
+    fails++;$('#er').textContent=fails<3?'Aquest PIN no és correcte. Torna-ho a provar! 🔁':'PIN incorrecte. Si no te’n recordes, mira a sota 👇';p1.value='';p1.focus();
+    if(fails>=2)$('#forgot').innerHTML=`<div class="rnote" style="margin-top:12px;font-size:15px">🤷 Has oblidat el PIN? Demana ajuda a la mestra o el mestre, o comença amb un nom nou prement <b>Sóc una altra persona</b>.</div>`};
+  p1.addEventListener('input',()=>{if(p1.value.length===4)tryPin()});
+  $('#pf').onsubmit=e=>{e.preventDefault();if(p1.value.length!==4){$('#er').textContent='El PIN té 4 números 🔢';return}tryPin()};}
 function pickNew(name){const sug=suggestNames(name);
   loginCard(`<div style="font-size:56px;line-height:1">✏️</div><h2 class="ff">Tria un nom diferent</h2><p>«${esc(name)}» ja està agafat. Pots triar un d'aquests:</p>
     <div class="chips">${sug.map((n,i)=>`<button class="chip" data-i="${i}">🙂 ${esc(n)}</button>`).join('')}</div>
     <div class="who"><div class="lbl">O escriu-ne un altre (per exemple, afegeix la inicial del cognom):</div>
     <form id="lf" autocomplete="off" style="margin-top:10px"><input id="nm" maxlength="20" placeholder="${esc(sug[0]||name)}" aria-label="Un altre nom" autocomplete="off"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button><button class="ghostbtn" type="button" id="bk">⟵ Torna enrere</button></div></form></div>`);
-  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>login(sug[+b.dataset.i]));
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>choosePin(sug[+b.dataset.i]));
   $('#bk').onclick=askName;const nm=$('#nm');
   $('#lf').onsubmit=e=>{e.preventDefault();const v=cleanName(nm.value);if(!v){$('#er').textContent='Escriu un nom, si us plau ✏️';nm.focus();return}
-    if(userExists(v)){$('#er').textContent=`«${v}» també està agafat. Prova'n un altre!`;nm.select();return}login(v)};}
+    if(userExists(v)){$('#er').textContent=`«${v}» també està agafat. Prova'n un altre!`;nm.select();return}choosePin(v)};}
 function loadStars(){return loadUser().stars}
 function saveStars(id,v){const u=loadUser();const old=u.stars[id];const better=old===undefined||(typeof v==='string'?parseFloat(v.replace(',','.'))>parseFloat(String(old).replace(',','.')):v>old);if(better){u.stars[id]=v;saveUser(u)}}
 function starStr(n){return '⭐'.repeat(n)+'☆'.repeat(3-n)}
