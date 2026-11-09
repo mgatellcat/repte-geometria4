@@ -487,19 +487,42 @@ function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
 function loadUser(){const u=USER?lsGet(ukey(USER),{}):{};u.stars=u.stars||{};u.seen=u.seen||{};return u}
 function saveUser(u){if(USER)lsSet(ukey(USER),u)}
 function knownUsers(){return lsGet('geo4-users',[])}
-function login(name){name=name.trim().replace(/\s+/g,' ');USER=name;
-  let list=knownUsers().filter(n=>n.toLowerCase()!==name.toLowerCase());list.unshift(name);lsSet('geo4-users',list.slice(0,12));
-  // estrelles antigues (d'abans que hi hagués usuaris): passen al primer nom que entri
-  const legacy=lsGet('geo4-stars',null);if(legacy){const u=loadUser();u.stars=Object.assign({},legacy,u.stars);saveUser(u);try{localStorage.removeItem('geo4-stars')}catch(e){}}
+// existeix si té dades guardades o si ja havia entrat abans (llista interna, no es mostra mai)
+function userExists(name){const k=name.trim().toLowerCase();return lsGet(ukey(name),null)!==null||knownUsers().some(n=>n.toLowerCase()===k)}
+const cleanName=n=>n.trim().replace(/\s+/g,' ');
+function login(name){name=cleanName(name);USER=name;
+  const list=knownUsers().filter(n=>n.toLowerCase()!==name.toLowerCase());list.push(name);lsSet('geo4-users',list);
+  const u=loadUser();if(!u.name){u.name=name;u.created=Date.now()}saveUser(u);
   home();}
-function askName(){S=null;USER=null;window.scrollTo(0,0);const list=knownUsers();
-  app.innerHTML=`<div class="login"><div class="qcard pop"><div style="font-size:60px;line-height:1">📐👋</div><h2 class="ff">Hola! Com et dius?</h2><p>Escriu el teu nom per guardar les teves estrelles.</p>
-    <form id="lf" autocomplete="off"><input id="nm" maxlength="20" placeholder="El teu nom" aria-label="El teu nom"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button></div></form>
-    ${list.length?`<div class="who"><div class="lbl">Ja has jugat abans? Toca el teu nom:</div><div class="chips">${list.map((n,i)=>`<button class="chip" data-i="${i}">🙂 ${esc(n)}</button>`).join('')}</div></div>`:''}
-  </div></div>`;
+// noms alternatius lliures: maria1, maria2, maria_m, maria_ma...
+function suggestNames(name){const out=[],max=20;const first=name[0].toLowerCase(),two=name.replace(/\s/g,'').slice(0,2).toLowerCase();
+  const add=c=>{if(c.length<=max&&!userExists(c)&&!out.some(o=>o.toLowerCase()===c.toLowerCase()))out.push(c)};
+  for(let i=1;out.length<2&&i<100;i++)add(name.slice(0,max-String(i).length)+i);
+  add(name.slice(0,max-2)+'_'+first);add(name.slice(0,max-3)+'_'+two);
+  for(let i=2;out.length<4&&i<100;i++)add(name.slice(0,max-2-String(i).length)+'_'+first+i);
+  return out}
+function loginCard(inner){S=null;USER=null;window.scrollTo(0,0);app.innerHTML=`<div class="login"><div class="qcard pop">${inner}</div></div>`}
+function askName(){
+  loginCard(`<div style="font-size:60px;line-height:1">📐👋</div><h2 class="ff">Hola! Com et dius?</h2><p>Escriu el teu nom per guardar les teves estrelles.</p>
+    <form id="lf" autocomplete="off"><input id="nm" maxlength="20" placeholder="El teu nom" aria-label="El teu nom" autocomplete="off"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button></div></form>`);
   const nm=$('#nm');setTimeout(()=>nm.focus(),50);
-  $('#lf').onsubmit=e=>{e.preventDefault();const v=nm.value.trim();if(!v){$('#er').textContent='Escriu el teu nom, si us plau ✏️';nm.focus();return}login(v)};
-  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>login(list[+b.dataset.i]));}
+  $('#lf').onsubmit=e=>{e.preventDefault();const v=cleanName(nm.value);if(!v){$('#er').textContent='Escriu el teu nom, si us plau ✏️';nm.focus();return}
+    if(userExists(v))askSame(v);else login(v)};}
+// el nom ja s'ha fet servir en aquest ordinador: és la mateixa persona o una altra?
+function askSame(name){
+  loginCard(`<div style="font-size:56px;line-height:1">🤔</div><h2 class="ff">Ja hi ha algú que es diu «${esc(name)}»</h2><p>Ets tu, que ja havies jugat abans?</p>
+    <div class="row"><button class="primary" id="yes">✅ Sí, sóc jo</button><button class="secondary" id="no">🙋 No, sóc una altra persona</button></div>
+    <div class="row" style="margin-top:10px"><button class="ghostbtn" id="bk">⟵ Torna enrere</button></div>`);
+  $('#yes').onclick=()=>login(name);$('#no').onclick=()=>pickNew(name);$('#bk').onclick=askName;}
+function pickNew(name){const sug=suggestNames(name);
+  loginCard(`<div style="font-size:56px;line-height:1">✏️</div><h2 class="ff">Tria un nom diferent</h2><p>«${esc(name)}» ja està agafat. Pots triar un d'aquests:</p>
+    <div class="chips">${sug.map((n,i)=>`<button class="chip" data-i="${i}">🙂 ${esc(n)}</button>`).join('')}</div>
+    <div class="who"><div class="lbl">O escriu-ne un altre (per exemple, afegeix la inicial del cognom):</div>
+    <form id="lf" autocomplete="off" style="margin-top:10px"><input id="nm" maxlength="20" placeholder="${esc(sug[0]||name)}" aria-label="Un altre nom" autocomplete="off"><div class="err" id="er"></div><div class="row" style="margin-top:8px"><button class="primary" type="submit">Som-hi! 🚀</button><button class="ghostbtn" type="button" id="bk">⟵ Torna enrere</button></div></form></div>`);
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>login(sug[+b.dataset.i]));
+  $('#bk').onclick=askName;const nm=$('#nm');
+  $('#lf').onsubmit=e=>{e.preventDefault();const v=cleanName(nm.value);if(!v){$('#er').textContent='Escriu un nom, si us plau ✏️';nm.focus();return}
+    if(userExists(v)){$('#er').textContent=`«${v}» també està agafat. Prova'n un altre!`;nm.select();return}login(v)};}
 function loadStars(){return loadUser().stars}
 function saveStars(id,v){const u=loadUser();const old=u.stars[id];const better=old===undefined||(typeof v==='string'?parseFloat(v.replace(',','.'))>parseFloat(String(old).replace(',','.')):v>old);if(better){u.stars[id]=v;saveUser(u)}}
 function starStr(n){return '⭐'.repeat(n)+'☆'.repeat(3-n)}
@@ -590,6 +613,8 @@ function results(){const m=S.m,N=S.results.length,ok=S.results.filter(r=>r.ok).l
   app.innerHTML=`<div class="qcard res pop"><h2 class="ff" style="margin:0;font-size:30px">${m.emoji} ${m.title}</h2><p style="margin:4px 0 0;font-weight:800;color:var(--muted)">🙂 ${esc(USER)}</p>${head}
     <div class="row"><button class="primary" onclick="start(${m.final?-1:MISSIONS.indexOf(m)})">🔄 Torna-ho a provar</button>${pct<1?`<button class="rbtn" style="font-size:18px;padding:13px 20px;border-radius:18px" onclick="showRecorda('${m.id}')">📖 Repassa el Recorda</button>`:''}<button class="secondary" onclick="home()">🏠 Menú</button>${!m.final&&MISSIONS.indexOf(m)<MISSIONS.length-1?`<button class="secondary" onclick="start(${MISSIONS.indexOf(m)+1})">Següent missió ➜</button>`:''}</div>${review}</div>`;
   if(pct>=.7)confetti();}
+// les notes d'abans que hi hagués usuaris no són de ningú: s'esborren
+try{localStorage.removeItem('geo4-stars')}catch(e){}
 askName();
 </script>
 </body>
